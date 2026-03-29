@@ -1,0 +1,6 @@
+bora_cumpade fibonacci(trem_di_numeru n)
+simbora
+    trem_di_numeru a
+    fica_assim_entao 0 uai
+    ta_bao a uai
+cabo.

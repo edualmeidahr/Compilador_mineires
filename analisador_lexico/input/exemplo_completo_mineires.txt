@@ -1,0 +1,64 @@
+causo
+  Arquivo de teste lexical: cobre comentario multilinha,
+  palavras reservadas, tipos, strings com escape, char,
+  numeros (decimal, hex, octal, float), operadores simbolo e por palavra.
+  Fecha com a palavra reservada abaixo.
+fim_do_causo
+
+bora_cumpade exemplo_lexico(
+    trem_di_numeru contador,
+    trem_cum_virgula nota,
+    trem_discrita nome,
+    trem_discolhe ativo
+) simbora
+
+    trem_di_numeru a fica_assim_entao 0 uai
+    trem_di_numeru b fica_assim_entao 42 uai
+    trem_di_numeru hex fica_assim_entao 0xFF uai
+    trem_di_numeru oct fica_assim_entao 077 uai
+    trem_cum_virgula pi fica_assim_entao 3.14 uai
+
+    trem_discrita msg fica_assim_entao "Mineires\n\tcom \"aspas\" e barra\\" uai
+    trem_discrita vazio fica_assim_entao "" uai
+
+    trosso letra_a fica_assim_entao 'Z' uai
+    trosso tab_uai fica_assim_entao '\t' uai
+    trosso aspas_simples fica_assim_entao '\'' uai
+
+    trem_discolhe ok fica_assim_entao eh uai
+    trem_discolhe falhou fica_assim_entao num_eh uai
+
+    uai_se n mema_coisa 0 tamem ativo quarque_um n neh_nada 10 simbora
+        contador fica_assim_entao contador + 1 uai
+        nota fica_assim_entao nota veiz 2.0 uai
+    cabo uai_senão simbora
+        contador fica_assim_entao contador - 1 uai
+        nota fica_assim_entao nota sob 2.0 uai
+    cabo
+
+    dependenu n du_casu
+        1 ta_bao contador fica_assim_entao contador / 2 uai
+        2 ta_bao contador fica_assim_entao contador % 3 uai
+        3 ta_bao contador fica_assim_entao contador veiz 1 uai
+    cabô
+
+    enquanto_tiver_trem n > 0 simbora
+        uai_se n >= 10 tamem n < 100 simbora
+            n fica_assim_entao n - 1 uai
+        cabo
+        uai_se n <= 1 simbora
+            n fica_assim_entao 0 uai
+        cabo
+    cabo
+
+    roda_esse_trem (i fica_assim_entao 0; i neh_nada n; i fica_assim_entao i + 1) simbora
+        a fica_assim_entao a veiz i uai
+    cabo
+
+    para_o_trem toca_o_trem uai
+
+    uai_se vam_marca falhou um_o_oto ok simbora
+        ativo fica_assim_entao num_eh uai
+    cabo
+
+    cabo.
