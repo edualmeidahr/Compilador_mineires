@@ -1,0 +1,20 @@
+Arquivo: /home/eduardo/Documentos/7 Periodo/Compiladores/analisador_lexico/exemplo_fibonacci.txt
+Total de tokens: 17
+
+(  1,  1)  'BORA_CUMPADE'                  'bora_cumpade'
+(  1, 14)  'IDENTIFICADOR'                 'fibonacci'
+(  1, 23)  'ABRE_PAREN'                    '('
+(  1, 24)  'TREM_DI_NUMERU'                'trem_di_numeru'
+(  1, 39)  'IDENTIFICADOR'                 'n'
+(  1, 40)  'FECHA_PAREN'                   ')'
+(  2,  1)  'SIMBORA'                       'simbora'
+(  3,  5)  'TREM_DI_NUMERU'                'trem_di_numeru'
+(  3, 20)  'IDENTIFICADOR'                 'a'
+(  4,  5)  'FICA_ASSIM_ENTAO'              'fica_assim_entao'
+(  4, 22)  'TREM_DI_NUMERU'                '0'
+(  4, 24)  'UAI'                           'uai'
+(  5,  5)  'TA_BAO'                        'ta_bao'
+(  5, 12)  'IDENTIFICADOR'                 'a'
+(  5, 14)  'UAI'                           'uai'
+(  6,  1)  'CABO'                          'cabo'
+(  6,  5)  'PONTO'                         '.'

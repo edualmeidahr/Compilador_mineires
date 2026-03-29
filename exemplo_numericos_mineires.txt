@@ -1,0 +1,28 @@
+causo
+  Teste apenas de literais numericos para o analisador lexico:
+  - decimal: 0, ou [1-9] seguido de digitos
+  - hexadecimal: 0x seguido de [0-9a-fA-F]+
+  - octal: 0 seguido de [1-7] e depois [0-7]*
+  - ponto flutuante: digitos.digitos (ex.: 3.14, 0.5)
+fim_do_causo
+
+0
+1
+42
+255
+9999
+
+0x0
+0xFF
+0x1a
+0xDEADBEEF
+0xabc
+
+07
+077
+01234567
+
+3.14
+0.5
+10.0
+123.456
