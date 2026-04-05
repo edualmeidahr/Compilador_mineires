@@ -62,6 +62,11 @@ TOKEN_IDS: Dict[str, int] = {
     "TA_BAO": 40,
     "PARA_O_TREM": 41,
     "TOCA_O_TREM": 42,
+    "EH_TRUE": 43,
+    "NUM_EH_FALSE": 44,
+
+    "VEIZ_MULT": 45,
+    "SOB_DIV": 46,
 
     # Literais
     "STRING_LITERAL": 50,
@@ -794,7 +799,7 @@ class LexerMineres:
         if state == S.FLOAT_FRAC:
             return _ScanResult(
                 lexeme=lexeme,
-                token_id="TREM_COM_VIRGULA",
+                token_id="TREM_CUM_VIRGULA",
                 line=line,
                 col=col,
                 next_index=j
