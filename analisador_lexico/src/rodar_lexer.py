@@ -17,7 +17,7 @@ from lexer_mineires import LexerMineres
 def format_tokens(tokens: list) -> str:
     lines = []
     for lexema, token_id, linha, coluna in tokens:
-        lines.append(f"({linha:3d},{coluna:3d})  {token_id!r:30s}  {lexema!r}")
+        lines.append(f"({linha:3d},{coluna:3d})  {token_id:4d}  {lexema!r}")
     return "\n".join(lines)
 
 
