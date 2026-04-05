@@ -4,8 +4,77 @@ from dataclasses import dataclass
 from typing import Dict, List, Tuple
 
 
-Token = Tuple[str, str, int, int]  # (Lexema, Token_ID, Linha, Coluna)
+Token = Tuple[str, int, int, int]  # (Lexema, Token_ID_INT, Linha, Coluna)
 
+TOKEN_IDS: Dict[str, int] = {
+    # Palavras-chave / blocos
+    "BORA_CUMPADE": 1,
+    "SIMBORA": 2,
+    "CABO": 3,
+    "UAI": 4,
+
+    # Tipos
+    "TREM_DI_NUMERU": 5,
+    "TREM_DI_NUMERU_DECIMAL": 6,
+    "TREM_DI_NUMERU_OCTAL": 7,
+    "TREM_DI_NUMERU_HEXA": 8,
+    "TREM_CUM_VIRGULA": 9,
+    "TREM_DISCRITA": 10,
+    "TREM_DISCOLHE": 11,
+    "TROSSO": 12,
+
+    # Identificador
+    "IDENTIFICADOR": 13,
+
+    # Operadores e símbolos
+    "ABRE_PAREN": 14,
+    "FECHA_PAREN": 15,
+    "VIRGULA": 16,
+    "PONTO_VIRGULA": 17,
+    "PONTO": 18,
+
+    "SOMA": 19,
+    "SUBTRACAO": 20,
+    "DIV_INTEIRA": 21,
+    "MOD": 22,
+
+    "MAIOR": 23,
+    "MAIOR_IGUAL": 24,
+    "MENOR": 25,
+    "MENOR_IGUAL": 26,
+
+    "FICA_ASSIM_ENTAO": 27,
+    "MEMA_COISA_IGUAL": 28,
+    "NEH_NADA_DIFERENTE": 29,
+
+    "QUARQUE_UM_OR": 30,
+    "TAMEM_AND": 31,
+    "VAM_MARCA_NOT": 32,
+    "UM_O_OTO_XOR": 33,
+
+    # Controle
+    "UAI_SE": 34,
+    "UAI_SENAO": 35,
+    "RODA_ESSE_TREM": 36,
+    "ENQUANTO_TIVER_TREM": 37,
+    "DEPENDENU": 38,
+    "DU_CASU": 39,
+    "TA_BAO": 40,
+    "PARA_O_TREM": 41,
+    "TOCA_O_TREM": 42,
+
+    # Literais
+    "STRING_LITERAL": 50,
+    "CHAR_LITERAL": 51,
+
+    # Erros
+    "Números mal formados": 90,
+    "Símbolos desconhecidos": 91,
+    "String mal formada": 92,
+    "String não fechada": 93,
+    "Caractere mal formado": 94,
+    "ERRO_COMENTARIO_NAO_FECHADO": 95,
+}
 
 @dataclass
 class _ScanResult:
@@ -78,7 +147,7 @@ class LexerMineres:
     _IS_IDENT_START = staticmethod(lambda ch: ch.isalpha() or ch == "_")
     _IS_IDENT_PART = staticmethod(lambda ch: ch.isalnum() or ch == "_")
 
-    # Caracteres whitespace a serem ignorados
+# Caracteres whitespace a serem ignorados
     _WHITESPACE = {" ", "\t", "\r", "\n"}
 
     # Separadores típicos (usados para ajudar na recuperação de erros)
@@ -87,6 +156,9 @@ class LexerMineres:
     # Após '\' em string/char literal (um caractere de escape)
     _VALID_ESCAPES = frozenset("ntr0'\"\\")
 
+    def _to_token_id(self, token_name: str) -> int:
+        return TOKEN_IDS.get(token_name, -1)
+        
     def tokenize(self, source: str) -> List[Token]:
         tokens: List[Token] = []
         i = 0
@@ -107,13 +179,13 @@ class LexerMineres:
             # Strings (aspas duplas) e char (aspas simples), com sequências de escape
             if ch == '"':
                 res = self._scan_string_dfa(source, i, line, col)
-                tokens.append((res.lexeme, res.token_id, res.line, res.col))
+                tokens.append((res.lexeme, self._to_token_id(res.token_id), res.line, res.col))
                 i, line, col = self._advance_to(source, res.next_index, line, col, res.lexeme)
                 continue
 
             if ch == "'":
                 res = self._scan_char_dfa(source, i, line, col)
-                tokens.append((res.lexeme, res.token_id, res.line, res.col))
+                tokens.append((res.lexeme, self._to_token_id(res.token_id), res.line, res.col))
                 i, line, col = self._advance_to(source, res.next_index, line, col, res.lexeme)
                 continue
 
@@ -125,20 +197,20 @@ class LexerMineres:
                     # comentário já foi consumido; res.lexeme contém o intervalo consumido
                     i, line, col = self._advance_to(source, res.next_index, line, col, res.lexeme)
                     continue
-                tokens.append((res.lexeme, res.token_id, res.line, res.col))
+                tokens.append((res.lexeme, self._to_token_id(res.token_id), res.line, res.col))
                 i, line, col = self._advance_to(source, res.next_index, line, col, res.lexeme)
                 continue
 
             # Números
             if ch.isdigit():
                 res = self._scan_number_dfa(source, i, line, col)
-                tokens.append((res.lexeme, res.token_id, res.line, res.col))
+                tokens.append((res.lexeme, self._to_token_id(res.token_id), res.line, res.col))
                 i, line, col = self._advance_to(source, res.next_index, line, col, res.lexeme)
                 continue
 
             # Operadores e símbolos (1-2 caracteres)
             res = self._scan_operator_or_symbol_dfa(source, i, line, col)
-            tokens.append((res.lexeme, res.token_id, res.line, res.col))
+            tokens.append((res.lexeme, self._to_token_id(res.token_id), res.line, res.col))
             i, line, col = self._advance_to(source, res.next_index, line, col, res.lexeme)
 
         return tokens
@@ -681,18 +753,51 @@ class LexerMineres:
         lexeme = "".join(lexeme_chars)
 
         # Classifica sucesso/erro
+                # Classifica sucesso/erro
         if state == S.HEX_DIGITS:
-            return _ScanResult(lexeme=lexeme, token_id="TREM_DI_NUMERU", line=line, col=col, next_index=j)
+            return _ScanResult(
+                lexeme=lexeme,
+                token_id="TREM_DI_NUMERU_HEXA",
+                line=line,
+                col=col,
+                next_index=j
+            )
+
         if state == S.OCTAL_DIGITS:
-            return _ScanResult(lexeme=lexeme, token_id="TREM_DI_NUMERU", line=line, col=col, next_index=j)
+            return _ScanResult(
+                lexeme=lexeme,
+                token_id="TREM_DI_NUMERU_OCTAL",
+                line=line,
+                col=col,
+                next_index=j
+            )
+
         if state == S.AFTER_0:
             # lexema deve ser "0"
-            return _ScanResult(lexeme=lexeme, token_id="TREM_DI_NUMERU", line=line, col=col, next_index=j)
+            return _ScanResult(
+                lexeme=lexeme,
+                token_id="TREM_DI_NUMERU_DECIMAL",
+                line=line,
+                col=col,
+                next_index=j
+            )
+
         if state == S.DECIMAL_DIGITS:
-            return _ScanResult(lexeme=lexeme, token_id="TREM_DI_NUMERU", line=line, col=col, next_index=j)
+            return _ScanResult(
+                lexeme=lexeme,
+                token_id="TREM_DI_NUMERU_DECIMAL",
+                line=line,
+                col=col,
+                next_index=j
+            )
+
         if state == S.FLOAT_FRAC:
             return _ScanResult(
-                lexeme=lexeme, token_id="TREM_CUM_VIRGULA", line=line, col=col, next_index=j
+                lexeme=lexeme,
+                token_id="TREM_COM_VIRGULA",
+                line=line,
+                col=col,
+                next_index=j
             )
 
         if state == S.ERROR or state in {S.AFTER_0_DOT, S.HEX_PREFIX_X, S.DECIMAL_DOT}:
