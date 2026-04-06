@@ -185,13 +185,15 @@ class LexerMineres:
             if ch == '"':
                 res = self._scan_string_dfa(source, i, line, col)
                 tokens.append((res.lexeme, self._to_token_id(res.token_id), res.line, res.col))
-                i, line, col = self._advance_to(source, res.next_index, line, col, res.lexeme)
+                texto_bruto = source[i:res.next_index]
+                i, line, col = self._advance_to(source, res.next_index, line, col, texto_bruto)
                 continue
 
             if ch == "'":
                 res = self._scan_char_dfa(source, i, line, col)
                 tokens.append((res.lexeme, self._to_token_id(res.token_id), res.line, res.col))
-                i, line, col = self._advance_to(source, res.next_index, line, col, res.lexeme)
+                texto_bruto = source[i:res.next_index]
+                i, line, col = self._advance_to(source, res.next_index, line, col, texto_bruto)
                 continue
 
             # Comentários iniciam com a palavra "causo"
@@ -200,23 +202,27 @@ class LexerMineres:
                 res = self._scan_identifier_or_keyword_dfa(source, i, line, col)
                 if res.token_id == "COMMENT_SKIPPED":
                     # comentário já foi consumido; res.lexeme contém o intervalo consumido
-                    i, line, col = self._advance_to(source, res.next_index, line, col, res.lexeme)
+                    texto_bruto = source[i:res.next_index]
+                    i, line, col = self._advance_to(source, res.next_index, line, col, texto_bruto)
                     continue
                 tokens.append((res.lexeme, self._to_token_id(res.token_id), res.line, res.col))
-                i, line, col = self._advance_to(source, res.next_index, line, col, res.lexeme)
+                texto_bruto = source[i:res.next_index]
+                i, line, col = self._advance_to(source, res.next_index, line, col, texto_bruto)
                 continue
 
             # Números
             if ch.isdigit():
                 res = self._scan_number_dfa(source, i, line, col)
                 tokens.append((res.lexeme, self._to_token_id(res.token_id), res.line, res.col))
-                i, line, col = self._advance_to(source, res.next_index, line, col, res.lexeme)
+                texto_bruto = source[i:res.next_index]
+                i, line, col = self._advance_to(source, res.next_index, line, col, texto_bruto)
                 continue
 
             # Operadores e símbolos (1-2 caracteres)
             res = self._scan_operator_or_symbol_dfa(source, i, line, col)
             tokens.append((res.lexeme, self._to_token_id(res.token_id), res.line, res.col))
-            i, line, col = self._advance_to(source, res.next_index, line, col, res.lexeme)
+            texto_bruto = source[i:res.next_index]
+            i, line, col = self._advance_to(source, res.next_index, line, col, texto_bruto)
 
         return tokens
 
@@ -420,15 +426,19 @@ class LexerMineres:
         while j < len(source):
             ch = source[j]
             if ch == "\\":
-                lexeme_chars.append(ch)
                 j += 1
                 if j >= len(source):
+                    lexeme_chars.append("\\") # Acabou do nada, põe a barra
                     break
+                
                 esc = source[j]
+                
                 if esc not in self._VALID_ESCAPES:
+                    # ESCAPE INVÁLIDO (mantém o seu erro)
+                    lexeme_chars.append("\\")
                     lexeme_chars.append(esc)
                     j += 1
-                    # Consome até a aspas de fechamento (ou EOF) num único token de erro
+                    # Consome até a aspas de fechamento...
                     while j < len(source):
                         c = source[j]
                         if c == "\\":
@@ -449,9 +459,12 @@ class LexerMineres:
                         col=col,
                         next_index=j,
                     )
-                lexeme_chars.append(esc)
-                j += 1
-                continue
+                else:
+                    # ESCAPE VÁLIDO: Traduz os dois caracteres (\ e n) para 1 só!
+                    mapa_escapes = {'n': '\n', 't': '\t', 'r': '\r', '0': '\0', "'": "'", '"': '"', '\\': '\\'}
+                    lexeme_chars.append(mapa_escapes[esc])
+                    j += 1
+                    continue
             if ch == "\n" or ch == "\r":
                 lexeme_chars.append(ch)
                 j += 1
@@ -522,9 +535,9 @@ class LexerMineres:
             )
 
         if source[j] == "\\":
-            lexeme_chars.append(source[j])
             j += 1
             if j >= len(source):
+                lexeme_chars.append("\\")
                 return _ScanResult(
                     lexeme="".join(lexeme_chars),
                     token_id="String não fechada",
@@ -532,8 +545,10 @@ class LexerMineres:
                     col=col,
                     next_index=j,
                 )
+            
             esc = source[j]
             if esc not in self._VALID_ESCAPES:
+                lexeme_chars.append("\\")
                 lexeme_chars.append(esc)
                 j += 1
                 return _ScanResult(
@@ -543,8 +558,11 @@ class LexerMineres:
                     col=col,
                     next_index=j,
                 )
-            lexeme_chars.append(esc)
-            j += 1
+            else:
+                # TRADUZ O CARACTERE DE ESCAPE
+                mapa_escapes = {'n': '\n', 't': '\t', 'r': '\r', '0': '\0', "'": "'", '"': '"', '\\': '\\'}
+                lexeme_chars.append(mapa_escapes[esc])
+                j += 1
         else:
             c = source[j]
             if c in "\n\r":
