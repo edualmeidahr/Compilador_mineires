@@ -22,7 +22,7 @@ bora_cumpade exemplo_lexico(
     trem_discrita vazio fica_assim_entao "" uai
 
     trosso letra_a fica_assim_entao 'Z' uai
-    trosso tab_uai fica_assim_entao '\t' uai
+    trosso tab_uai fica_assim_entao "bao \n nao \n ola" uai
     trosso aspas_simples fica_assim_entao '\'' uai
 
     trem_discolhe ok fica_assim_entao eh uai

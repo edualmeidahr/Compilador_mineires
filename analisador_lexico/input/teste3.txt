@@ -1,0 +1,6 @@
+bora_cumpade main()
+simbora
+    trem_di_numeru x uai
+    x fica_assim_entao 10 uai
+    uai_se (x > 5) uai
+cabo

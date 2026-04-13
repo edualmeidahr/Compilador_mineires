@@ -32,45 +32,53 @@ TOKEN_IDS: Dict[str, int] = {
     "VIRGULA": 16,
     "PONTO_VIRGULA": 17,
     "PONTO": 18,
+    "DOIS_PONTOS": 19,
 
-    "SOMA": 19,
-    "SUBTRACAO": 20,
-    "DIV_INTEIRA": 21,
-    "MOD": 22,
+    "SOMA": 20,
+    "SUBTRACAO": 21,
+    "DIV_INTEIRA": 22,
+    "MOD": 23,
 
-    "MAIOR": 23,
-    "MAIOR_IGUAL": 24,
-    "MENOR": 25,
-    "MENOR_IGUAL": 26,
+    "MAIOR": 24,
+    "MAIOR_IGUAL": 25,
+    "MENOR": 26,
+    "MENOR_IGUAL": 27,
 
-    "FICA_ASSIM_ENTAO": 27,
-    "MEMA_COISA_IGUAL": 28,
-    "NEH_NADA_DIFERENTE": 29,
+    "FICA_ASSIM_ENTAO": 28,
+    "MEMA_COISA_IGUAL": 29,
+    "NEH_NADA_DIFERENTE": 30,
 
-    "QUARQUE_UM_OR": 30,
-    "TAMEM_AND": 31,
-    "VAM_MARCA_NOT": 32,
-    "UM_O_OTO_XOR": 33,
+    "QUARQUE_UM_OR": 31,
+    "TAMEM_AND": 32,
+    "VAM_MARCA_NOT": 33,
+    "UM_O_OTO_XOR": 34,
 
     # Controle
-    "UAI_SE": 34,
-    "UAI_SENAO": 35,
-    "RODA_ESSE_TREM": 36,
-    "ENQUANTO_TIVER_TREM": 37,
-    "DEPENDENU": 38,
-    "DU_CASU": 39,
-    "TA_BAO": 40,
-    "PARA_O_TREM": 41,
-    "TOCA_O_TREM": 42,
-    "EH_TRUE": 43,
-    "NUM_EH_FALSE": 44,
+    "UAI_SE": 35,
+    "UAI_SENAO": 36,
+    "RODA_ESSE_TREM": 37,
+    "ENQUANTO_TIVER_TREM": 38,
+    "DEPENDENU": 39,
+    "DU_CASU": 40,
+    "TA_BAO": 41,
+    "PARA_O_TREM": 42,
+    "TOCA_O_TREM": 43,
+    "EH_TRUE": 44,
+    "NUM_EH_FALSE": 45,
 
-    "VEIZ_MULT": 45,
-    "SOB_DIV": 46,
+    # IO / especiais
+    "XOVE": 46,
+    "OIA_PROCE_VE": 47,
+    "MAIN": 48,
+    "DEFAULT": 49,
+
+    # Operadores aritméticos por palavra
+    "VEIZ_MULT": 50,
+    "SOB_DIV": 51,
 
     # Literais
-    "STRING_LITERAL": 50,
-    "CHAR_LITERAL": 51,
+    "STRING_LITERAL": 60,
+    "CHAR_LITERAL": 61,
 
     # Erros
     "Números mal formados": 90,
@@ -101,52 +109,59 @@ class LexerMineres:
 
     # Palavras reservadas / palavras-chave (inclui operadores lógicos e alguns operadores aritméticos)
     _KEYWORDS: Dict[str, str] = {
-        # Controle / estruturas
-        "bora_cumpade": "BORA_CUMPADE",  # início de declaração de função
-        "uai_se": "UAI_SE",
-        "uai_senão": "UAI_SENAO",
-        "roda_esse_trem": "RODA_ESSE_TREM",
-        "enquanto_tiver_trem": "ENQUANTO_TIVER_TREM",
-        "dependenu": "DEPENDENU",
-        "du_casu": "DU_CASU",
-        "ta_bao": "TA_BAO",
-        "para_o_trem": "PARA_O_TREM",
-        "toca_o_trem": "TOCA_O_TREM",
+    # Controle / estruturas
+    "bora_cumpade": "BORA_CUMPADE",
+    "main": "MAIN",
+    "uai_se": "UAI_SE",
+    "uai_senao": "UAI_SENAO",
+    "uai_senão": "UAI_SENAO",
+    "roda_esse_trem": "RODA_ESSE_TREM",
+    "enquanto_tiver_trem": "ENQUANTO_TIVER_TREM",
+    "dependenu": "DEPENDENU",
+    "du_casu": "DU_CASU",
+    "default": "DEFAULT",
+    "ta_bao": "TA_BAO",
+    "para_o_trem": "PARA_O_TREM",
+    "toca_o_trem": "TOCA_O_TREM",
 
-        # Tipos
-        "trem_di_numeru": "TREM_DI_NUMERU",
-        "trem_cum_virgula": "TREM_CUM_VIRGULA",
-        "trem_discrita": "TREM_DISCRITA",
-        "trem_discolhe": "TREM_DISCOLHE",
-        "trosso": "TROSSO",
+    # Entrada / saída
+    "xove": "XOVE",
+    "oia_proce_ve": "OIA_PROCE_VE",
 
-        # Valores lógicos
-        "eh": "EH_TRUE",
-        "num_eh": "NUM_EH_FALSE",
+    # Tipos
+    "trem_di_numeru": "TREM_DI_NUMERU",
+    "trem_cum_virgula": "TREM_CUM_VIRGULA",
+    "trem_discrita": "TREM_DISCRITA",
+    "trem_discolhe": "TREM_DISCOLHE",
+    "trosso": "TROSSO",
 
-        # Blocos
-        "simbora": "SIMBORA",
-        "cabo": "CABO",
-        "cabô": "CABO",
+    # Valores lógicos
+    "eh": "EH_TRUE",
+    "num_eh": "NUM_EH_FALSE",
 
-        # Terminador (equivalente ao ;)
-        "uai": "UAI",
+    # Blocos
+    "simbora": "SIMBORA",
+    "cabo": "CABO",
+    "cabô": "CABO",
 
-        # Operadores (palavras)
-        "fica_assim_entao": "FICA_ASSIM_ENTAO",
-        "mema_coisa": "MEMA_COISA_IGUAL",  # deve ser usado como operador '=='
-        "neh_nada": "NEH_NADA_DIFERENTE",  # deve ser usado como operador '!='
+    # Terminador
+    "uai": "UAI",
 
-        # Lógicos
-        "quarque_um": "QUARQUE_UM_OR",
-        "tamem": "TAMEM_AND",
-        "vam_marca": "VAM_MARCA_NOT",
-        "um_o_oto": "UM_O_OTO_XOR",
+    # Operadores por palavra
+    "fica_assim_entao": "FICA_ASSIM_ENTAO",
+    "mema_coisa": "MEMA_COISA_IGUAL",
+    "neh_nada": "NEH_NADA_DIFERENTE",
 
-        # Aritméticos (palavras)
-        "veiz": "VEIZ_MULT",
-        "sob": "SOB_DIV",
-    }
+    # Lógicos
+    "quarque_um": "QUARQUE_UM_OR",
+    "tamem": "TAMEM_AND",
+    "vam_marca": "VAM_MARCA_NOT",
+    "um_o_oto": "UM_O_OTO_XOR",
+
+    # Aritméticos por palavra
+    "veiz": "VEIZ_MULT",
+    "sob": "SOB_DIV",
+}
 
     # Caracteres válidos em identificadores
     _IS_IDENT_START = staticmethod(lambda ch: ch.isalpha() or ch == "_")
