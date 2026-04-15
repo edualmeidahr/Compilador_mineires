@@ -4,7 +4,7 @@ from analisador_sintatico import Parser, ErroSintatico
 
 def main():
     # nome do arquivo de teste
-    nome_arquivo = "../input/teste3.txt"
+    nome_arquivo = "../input/teste_completo.txt"
 
     # 1. rodar o lexer
     lexer = LexerMineres()

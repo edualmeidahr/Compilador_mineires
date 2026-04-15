@@ -1,0 +1,75 @@
+causo 
+  ======================================================
+  Programa de Teste Completo do Compilador Mineirês
+  ======================================================
+  Aqui a gente testa se as correções do : e do default 
+  deram certo, e se o resto das regras tá nos trincos!
+fim_do_causo
+
+bora_cumpade main()
+simbora
+    causo 1. DECLARAÇÃO DE TODOS OS TIPOS fim_do_causo
+    trem_di_numeru contador, limite uai
+    trem_cum_virgula nota_final uai
+    trem_discrita mensagem uai
+    trem_discolhe passou_de_ano uai
+    trosso letrinha uai
+
+    causo 2. ATRIBUIÇÃO E VALORES LITERAIS fim_do_causo
+    contador fica_assim_entao 0 uai
+    limite fica_assim_entao 5 uai
+    nota_final fica_assim_entao 7.5 uai
+    mensagem fica_assim_entao "Ola, mundo mineiro!\n" uai
+    passou_de_ano fica_assim_entao eh uai
+    letrinha fica_assim_entao 'A' uai
+
+    causo 3. SAÍDA DE DADOS (PRINT) fim_do_causo
+    oia_proce_ve(mensagem) uai
+
+    causo 4. LAÇO DE REPETIÇÃO FOR (RODA_ESSE_TREM) E IF/ELSE fim_do_causo
+    roda_esse_trem (i fica_assim_entao 1; i <= limite; i fica_assim_entao i + 1)
+    simbora
+        uai_se (i mema_coisa 3)
+        simbora
+            oia_proce_ve("Chegou no tres, vamos pular!") uai
+            toca_o_trem uai causo Teste do comando continue fim_do_causo
+        cabo
+        uai_senao
+        simbora
+            oia_proce_ve("Numero da vez: ", i) uai
+        cabo
+    cabo
+
+    causo 5. LAÇO DE REPETIÇÃO WHILE (ENQUANTO_TIVER_TREM) COM OPERADORES LÓGICOS fim_do_causo
+    enquanto_tiver_trem (contador < 10 tamem passou_de_ano mema_coisa eh)
+    simbora
+        contador fica_assim_entao contador + 2 uai
+        
+        uai_se (contador >= 8)
+        simbora
+            para_o_trem uai causo Teste do comando break fim_do_causo
+        cabo
+    cabo
+
+    causo 6. ESTRUTURA DE ESCOLHA (DEPENDENU / SWITCH CASE) fim_do_causo
+    causo Aqui vamos ver se o ':' e o 'default' estão funcionando direitinho! fim_do_causo
+    dependenu (contador)
+    simbora
+        du_casu 2:
+            oia_proce_ve("O contador parou no dois") uai
+        du_casu 8:
+            oia_proce_ve("O contador parou no oito, o break funcionou!") uai
+        default:
+            oia_proce_ve("O contador nao eh nem dois nem oito") uai
+    cabo
+
+    causo 7. ENTRADA DE DADOS E ARITMÉTICA COMPLEXA fim_do_causo
+    trem_di_numeru valor_lido uai
+    oia_proce_ve("Digita um numeru ai pra gente testar a matematica: ") uai
+    xove (trem_di_numeru, valor_lido) uai
+    
+    causo Testando a ordem de precedência com parênteses e operadores fim_do_causo
+    valor_lido fica_assim_entao (valor_lido veiz 2) + (10 / 2) uai
+    oia_proce_ve("O dobro do numero mais cinco eh: ", valor_lido) uai
+
+cabo
