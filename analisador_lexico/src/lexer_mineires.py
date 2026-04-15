@@ -171,7 +171,7 @@ class LexerMineres:
     _WHITESPACE = {" ", "\t", "\r", "\n"}
 
     # Separadores típicos (usados para ajudar na recuperação de erros)
-    _SEPARATORS = {" ", "\t", "\r", "\n", "(", ")", ",", ";", "{", "}", "[", "]"}
+    _SEPARATORS = {" ", "\t", "\r", "\n", "(", ")", ",", ";", "{", "}", "[", "]", ":"}
 
     # Após '\' em string/char literal (um caractere de escape)
     _VALID_ESCAPES = frozenset("ntr0'\"\\")
@@ -942,6 +942,8 @@ class LexerMineres:
             return _ScanResult(";", "PONTO_VIRGULA", line=line, col=col, next_index=i + 1)
         if ch == ".":
             return _ScanResult(".", "PONTO", line=line, col=col, next_index=i + 1)
+        if ch == ":":
+            return _ScanResult(":", "DOIS_PONTOS", line=line, col=col, next_index=i + 1) 
 
         # Se cair aqui, é símbolo desconhecido
         return _ScanResult(
