@@ -1,0 +1,14 @@
+causo 
+  ======================================================
+  Demonstrando a limitação do Parser (Problema 2)
+  ======================================================
+  O Lexer vai ler isso aqui tranquilamente, mas o Sintático
+  vai reclamar que a função não se chama 'main'.
+fim_do_causo
+
+bora_cumpade soma_os_trem(trem_di_numeru a, trem_di_numeru b)
+simbora
+    trem_di_numeru resultado uai
+    resultado fica_assim_entao a + b uai
+    oia_proce_ve("A soma deu: ", resultado) uai
+cabo
