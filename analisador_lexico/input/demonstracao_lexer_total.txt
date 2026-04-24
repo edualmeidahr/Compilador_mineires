@@ -1,0 +1,57 @@
+causo
+  ====================================================================
+  DEMONSTRACAO LEXICA — Mineires (ver output em output/demonstracao_saida.txt)
+  Bloco: causo/fim  |  Linha: //  |  / = divisao  |  // = comentario
+  Octal invalido (8,9) = ErroLexico  |  Int em trem_cum_virgula vira N.0
+  ====================================================================
+fim_do_causo
+
+// comentario de linha: nada daqui gera token
+
+bora_cumpade main() // main e o resto vira comentario
+simbora
+    // tipos, literais, float .N -> 0.N   N. -> N.0
+    trem_di_numeru d uai
+    trem_di_numeru h uai
+    trem_di_numeru o uai
+    trem_cum_virgula f1 uai
+    trem_cum_virgula f2 uai
+    trem_cum_virgula f3 uai
+    trem_cum_virgula f4 uai
+    trem_discrita s1 uai
+    trem_discolhe logico uai
+    trosso t uai
+    trem_di_numeru rdiv uai
+
+    d fica_assim_entao 100 uai
+    h fica_assim_entao 0x1a uai
+    o fica_assim_entao 0123 uai
+    f1 fica_assim_entao 3.14 uai
+    f2 fica_assim_entao 0.5 uai
+    f3 fica_assim_entao .25 uai
+    f2 fica_assim_entao 4. uai
+    f4 fica_assim_entao 2 uai
+    s1 fica_assim_entao "Dentro da string // nao e comentario" uai
+    logico fica_assim_entao eh uai
+    t fica_assim_entao 'Z' uai
+
+    oia_proce_ve(s1) uai
+    oia_proce_ve("Dobra e divide:") uai
+    d fica_assim_entao (d veiz 2) uai
+    oia_proce_ve(d) uai
+    rdiv fica_assim_entao 7 / / 2 uai
+    oia_proce_ve("Divisao 7/2: ", rdiv) uai
+    f1 fica_assim_entao f1 + .5 uai
+
+    uai_se (d neh_nada 0) simbora
+        f2 fica_assim_entao f2 sob 2.0 uai
+    cabo uai_senao simbora
+        f2 fica_assim_entao f2 uai
+    cabo
+
+    trem_di_numeru no_limite uai
+    no_limite fica_assim_entao 017777777777 uai
+    oia_proce_ve("octal max 32b ok", no_limite) uai
+
+cabo
+// fim

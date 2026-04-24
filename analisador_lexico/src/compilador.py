@@ -1,4 +1,4 @@
-from lexer_mineires import LexerMineres
+from lexer_mineires import ErroLexico, LexerMineres
 from analisador_sintatico import Parser, ErroSintatico
 
 
@@ -8,7 +8,12 @@ def main():
 
     # 1. rodar o lexer
     lexer = LexerMineres()
-    tokens = lexer.tokenize_file(nome_arquivo)
+    try:
+        tokens = lexer.tokenize_file(nome_arquivo)
+    except ErroLexico as e:
+        print("Erro léxico:")
+        print(e)
+        return
 
     print("TOKENS GERADOS:")
     for t in tokens:
