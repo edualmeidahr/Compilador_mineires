@@ -1,0 +1,20 @@
+Arquivo: C:\Users\joaom\Downloads\Compilador_mineires-main\Compilador_mineires-main\analisador_lexico\Compilador_mineires\analisador_lexico\input\exemplo_numericos_mineires.txt
+Total de tokens: 17
+
+(  9,  1)     6  0
+( 10,  1)     6  1
+( 11,  1)     6  42
+( 12,  1)     6  255
+( 13,  1)     6  9999
+( 15,  1)     8  0x0
+( 16,  1)     8  0xFF
+( 17,  1)     8  0x1a
+( 18,  1)     8  0xDEADBEEF
+( 19,  1)     8  0xabc
+( 21,  1)     7  07
+( 22,  1)     7  077
+( 23,  1)     7  01234567
+( 25,  1)     9  3.14
+( 26,  1)     9  0.5
+( 27,  1)     9  10.0
+( 28,  1)     9  123.456

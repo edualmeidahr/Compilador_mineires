@@ -535,22 +535,26 @@ class LexerMineres:
 
         while j < len(source):
             ch = source[j]
+
             if ch == "\\":
                 j += 1
+
                 if j >= len(source):
-                    lexeme_chars.append("\\") # Acabou do nada, põe a barra
+                    lexeme_chars.append("\\")  # Acabou do nada, põe a barra
                     break
-                
+
                 esc = source[j]
-                
+
                 if esc not in self._VALID_ESCAPES:
                     # ESCAPE INVÁLIDO (mantém o seu erro)
                     lexeme_chars.append("\\")
                     lexeme_chars.append(esc)
                     j += 1
+
                     # Consome até a aspas de fechamento...
                     while j < len(source):
                         c = source[j]
+
                         if c == "\\":
                             lexeme_chars.append(c)
                             j += 1
@@ -558,10 +562,13 @@ class LexerMineres:
                                 lexeme_chars.append(source[j])
                                 j += 1
                             continue
+
                         lexeme_chars.append(c)
                         j += 1
+
                         if c == '"':
                             break
+
                     return _ScanResult(
                         lexeme="".join(lexeme_chars),
                         token_id="String mal formada",
@@ -569,13 +576,23 @@ class LexerMineres:
                         col=col,
                         next_index=j,
                     )
+
                 else:
                     # ESCAPE VÁLIDO: Traduz os dois caracteres (\ e n) para 1 só!
-                    mapa_escapes = {'n': '\n', 't': '\t', 'r': '\r', '0': '\0', "'": "'", '"': '"', '\\': '\\'}
+                    mapa_escapes = {
+                        "n": "\n",
+                        "t": "\t",
+                        "r": "\r",
+                        "0": "\0",
+                        "'": "'",
+                        '"': '"',
+                        "\\": "\\",
+                    }
                     lexeme_chars.append(mapa_escapes[esc])
                     j += 1
                     continue
-            if ch == "\n" or ch == "\r":
+
+            elif ch == "\n" or ch == "\r":
                 lexeme_chars.append(ch)
                 j += 1
                 return _ScanResult(
@@ -585,16 +602,19 @@ class LexerMineres:
                     col=col,
                     next_index=j,
                 )
-            lexeme_chars.append(ch)
-            j += 1
-            if ch == '"':
-                return _ScanResult(
-                    lexeme="".join(lexeme_chars),
-                    token_id="STRING_LITERAL",
-                    line=line,
-                    col=col,
-                    next_index=j,
-                )
+
+            else:
+                lexeme_chars.append(ch)
+                j += 1
+
+                if ch == '"':
+                    return _ScanResult(
+                        lexeme="".join(lexeme_chars),
+                        token_id="STRING_LITERAL",
+                        line=line,
+                        col=col,
+                        next_index=j,
+                    )
 
         return _ScanResult(
             lexeme="".join(lexeme_chars),
@@ -644,8 +664,9 @@ class LexerMineres:
                 next_index=j,
             )
 
-        if source[j] == "\\":
+        elif source[j] == "\\":
             j += 1
+
             if j >= len(source):
                 lexeme_chars.append("\\")
                 return _ScanResult(
@@ -655,8 +676,9 @@ class LexerMineres:
                     col=col,
                     next_index=j,
                 )
-            
+
             esc = source[j]
+
             if esc not in self._VALID_ESCAPES:
                 lexeme_chars.append("\\")
                 lexeme_chars.append(esc)
@@ -668,13 +690,23 @@ class LexerMineres:
                     col=col,
                     next_index=j,
                 )
+
             else:
-                # TRADUZ O CARACTERE DE ESCAPE
-                mapa_escapes = {'n': '\n', 't': '\t', 'r': '\r', '0': '\0', "'": "'", '"': '"', '\\': '\\'}
+                mapa_escapes = {
+                    "n": "\n",
+                    "t": "\t",
+                    "r": "\r",
+                    "0": "\0",
+                    "'": "'",
+                    '"': '"',
+                    "\\": "\\",
+                }
                 lexeme_chars.append(mapa_escapes[esc])
                 j += 1
+
         else:
             c = source[j]
+
             if c in "\n\r":
                 lexeme_chars.append(c)
                 j += 1
@@ -685,6 +717,7 @@ class LexerMineres:
                     col=col,
                     next_index=j,
                 )
+
             lexeme_chars.append(c)
             j += 1
 
@@ -697,7 +730,7 @@ class LexerMineres:
                 next_index=j,
             )
 
-        if source[j] != "'":
+        elif source[j] != "'":
             return _ScanResult(
                 lexeme="".join(lexeme_chars),
                 token_id="Caractere mal formado",
@@ -706,15 +739,16 @@ class LexerMineres:
                 next_index=j,
             )
 
-        lexeme_chars.append(source[j])
-        j += 1
-        return _ScanResult(
-            lexeme="".join(lexeme_chars),
-            token_id="CHAR_LITERAL",
-            line=line,
-            col=col,
-            next_index=j,
-        )
+        else:
+            lexeme_chars.append(source[j])
+            j += 1
+            return _ScanResult(
+                lexeme="".join(lexeme_chars),
+                token_id="CHAR_LITERAL",
+                line=line,
+                col=col,
+                next_index=j,
+            )
 
     # -------------------------
     # DFA: Número (hex, octal, decimal, float)
@@ -741,7 +775,6 @@ class LexerMineres:
             FLOAT_FRAC = 9
             ERROR = 10
             FLOAT_PONTO_SEM_FRAC = 11  # "2." ou "0." → 2.0 / 0.0
-
 
         def is_hex_digit(ch: str) -> bool:
             return ch.isdigit() or ("a" <= ch.lower() <= "f")
@@ -770,7 +803,7 @@ class LexerMineres:
                     j += 1
                     state = S.AFTER_0
                     continue
-                if "1" <= ch <= "9":
+                elif "1" <= ch <= "9":
                     lexeme_chars.append(ch)
                     j += 1
                     state = S.DECIMAL_DIGITS
@@ -778,19 +811,19 @@ class LexerMineres:
                 # caso improvável
                 break
 
-            if state == S.AFTER_0:
+            elif state == S.AFTER_0:
                 # 0 pode ser decimal puro, ou iniciar float (0.xxx), hex (0x...), ou octal (0[1-7]...)
                 if ch == ".":
                     lexeme_chars.append(ch)
                     j += 1
                     state = S.AFTER_0_DOT
                     continue
-                if ch in ("x", "X"):
+                elif ch in ("x", "X"):
                     lexeme_chars.append(ch)
                     j += 1
                     state = S.HEX_PREFIX_X
                     continue
-                if ch.isdigit():
+                elif ch.isdigit():
                     # decimal puro (apenas '0') não aceita dígitos adicionais => erro
                     # exceto octal, que só é permitido se o primeiro dígito for [1-7]
                     if "1" <= ch <= "7":
@@ -798,7 +831,7 @@ class LexerMineres:
                         j += 1
                         state = S.OCTAL_DIGITS
                         continue
-                    if ch in "01234567":
+                    elif ch in "01234567":
                         # já era '0' seguido por '0' => não previsto pela gramática
                         lexeme_chars.append(ch)
                         j += 1
@@ -812,19 +845,19 @@ class LexerMineres:
                 # não é dígito/dot/x => fim do número com lexema "0"
                 break
 
-            if state == S.AFTER_0_DOT:
+            elif state == S.AFTER_0_DOT:
                 if is_dec_digit(ch):
                     lexeme_chars.append(ch)
                     j += 1
                     state = S.FLOAT_FRAC
                     continue
-                if j >= len(source) or ch in self._SEPARATORS or ch == "/":
+                elif j >= len(source) or ch in self._SEPARATORS or ch == "/":
                     state = S.FLOAT_PONTO_SEM_FRAC
                     break
                 state = S.ERROR
                 break
 
-            if state == S.HEX_PREFIX_X:
+            elif state == S.HEX_PREFIX_X:
                 # precisa de pelo menos 1 dígito hex depois do 0x
                 if is_hex_digit(ch):
                     lexeme_chars.append(ch)
@@ -835,59 +868,59 @@ class LexerMineres:
                 state = S.ERROR
                 break
 
-            if state == S.HEX_DIGITS:
+            elif state == S.HEX_DIGITS:
                 if is_hex_digit(ch):
                     lexeme_chars.append(ch)
                     j += 1
                     continue
                 break
 
-            if state == S.OCTAL_DIGITS:
+            elif state == S.OCTAL_DIGITS:
                 # após o primeiro dígito (1-7), aceita [0-7]*
                 if is_octal_digit(ch):
                     lexeme_chars.append(ch)
                     j += 1
                     continue
                 # 8 e 9 não podem fazer parte do octal: número mal formado (lexema inteiro)
-                if ch in "89":
+                elif ch in "89":
                     lexeme_chars.append(ch)
                     j += 1
                     state = S.ERROR
                     continue
                 break
 
-            if state == S.DECIMAL_DIGITS:
+            elif state == S.DECIMAL_DIGITS:
                 if is_dec_digit(ch):
                     lexeme_chars.append(ch)
                     j += 1
                     continue
-                if ch == ".":
+                elif ch == ".":
                     lexeme_chars.append(ch)
                     j += 1
                     state = S.DECIMAL_DOT
                     continue
                 break
 
-            if state == S.DECIMAL_DOT:
+            elif state == S.DECIMAL_DOT:
                 if is_dec_digit(ch):
                     lexeme_chars.append(ch)
                     j += 1
                     state = S.FLOAT_FRAC
                     continue
-                if j >= len(source) or ch in self._SEPARATORS or ch == "/":
+                elif j >= len(source) or ch in self._SEPARATORS or ch == "/":
                     state = S.FLOAT_PONTO_SEM_FRAC
                     break
                 state = S.ERROR
                 break
 
-            if state == S.FLOAT_FRAC:
+            elif state == S.FLOAT_FRAC:
                 if is_dec_digit(ch):
                     lexeme_chars.append(ch)
                     j += 1
                     continue
                 break
 
-            if state == S.ERROR:
+            elif state == S.ERROR:
                 # Consome mais caracteres prováveis de número antes de retornar o erro
                 if ch in allowed_error_chars:
                     lexeme_chars.append(ch)
@@ -910,7 +943,7 @@ class LexerMineres:
                 next_index=j
             )
 
-        if state == S.OCTAL_DIGITS:
+        elif state == S.OCTAL_DIGITS:
             try:
                 v = int(lexeme, 8)
             except ValueError:
@@ -927,7 +960,7 @@ class LexerMineres:
                 next_index=j
             )
 
-        if state == S.AFTER_0:
+        elif state == S.AFTER_0:
             # lexema deve ser "0"
             return _ScanResult(
                 lexeme=lexeme,
@@ -937,7 +970,7 @@ class LexerMineres:
                 next_index=j
             )
 
-        if state == S.DECIMAL_DIGITS:
+        elif state == S.DECIMAL_DIGITS:
             return _ScanResult(
                 lexeme=lexeme,
                 token_id="TREM_DI_NUMERU_DECIMAL",
@@ -946,7 +979,7 @@ class LexerMineres:
                 next_index=j
             )
 
-        if state == S.FLOAT_FRAC:
+        elif state == S.FLOAT_FRAC:
             return _ScanResult(
                 lexeme=lexeme,
                 token_id="TREM_CUM_VIRGULA",
@@ -955,7 +988,7 @@ class LexerMineres:
                 next_index=j
             )
 
-        if state == S.FLOAT_PONTO_SEM_FRAC:
+        elif state == S.FLOAT_PONTO_SEM_FRAC:
             return _ScanResult(
                 lexeme=lexeme + "0",
                 token_id="TREM_CUM_VIRGULA",
@@ -964,7 +997,7 @@ class LexerMineres:
                 next_index=j
             )
 
-        if state in (S.ERROR, S.HEX_PREFIX_X):
+        elif state in (S.ERROR, S.HEX_PREFIX_X):
             _falha_numero(line, col, lexeme, "sequência numérica inválida")
 
         # Caso inesperado
@@ -977,17 +1010,30 @@ class LexerMineres:
         Float com zero à esquerda: .5 e .07 → lexemas 0.5 e 0.07.
         Só chamar quando source[i] == '.' e o próximo caractere for dígito.
         """
-        if i >= len(source) or source[i] != ".":
-            _falha_numero(line, col, source[i : i + 1] or "", "esperava '.' no literal")
+
+        if i >= len(source):
+            _falha_numero(line, col, "", "esperava '.' no literal")
+
+        elif source[i] != ".":
+            _falha_numero(line, col, source[i : i + 1], "esperava '.' no literal")
+
         j = i + 1
         lexeme_chars: List[str] = ["0", "."]
-        if j >= len(source) or not source[j].isdigit():
+
+        if j >= len(source):
             _falha_numero(
                 line, col, "0.", "parte fracionária de float exige ao menos um dígito"
             )
+
+        elif not source[j].isdigit():
+            _falha_numero(
+                line, col, "0.", "parte fracionária de float exige ao menos um dígito"
+            )
+
         while j < len(source) and source[j].isdigit():
             lexeme_chars.append(source[j])
             j += 1
+
         return _ScanResult(
             lexeme="".join(lexeme_chars),
             token_id="TREM_CUM_VIRGULA",
@@ -1014,7 +1060,6 @@ class LexerMineres:
         """
 
         ch = source[i]
-        j = i + 1
 
         # Relacionais
         if ch == ">":
@@ -1026,15 +1071,16 @@ class LexerMineres:
                     col=col,
                     next_index=i + 2,
                 )
-            return _ScanResult(
-                lexeme=">",
-                token_id="MAIOR",
-                line=line,
-                col=col,
-                next_index=i + 1,
-            )
+            else:
+                return _ScanResult(
+                    lexeme=">",
+                    token_id="MAIOR",
+                    line=line,
+                    col=col,
+                    next_index=i + 1,
+                )
 
-        if ch == "<":
+        elif ch == "<":
             if i + 1 < len(source) and source[i + 1] == "=":
                 return _ScanResult(
                     lexeme="<=",
@@ -1043,44 +1089,53 @@ class LexerMineres:
                     col=col,
                     next_index=i + 2,
                 )
+            else:
+                return _ScanResult(
+                    lexeme="<",
+                    token_id="MENOR",
+                    line=line,
+                    col=col,
+                    next_index=i + 1,
+                )
+
+        # Aritméticos e símbolos
+        elif ch == "+":
+            return _ScanResult("+", "SOMA", line=line, col=col, next_index=i + 1)
+
+        elif ch == "-":
+            return _ScanResult("-", "SUBTRACAO", line=line, col=col, next_index=i + 1)
+
+        elif ch == "%":
+            return _ScanResult("%", "MOD", line=line, col=col, next_index=i + 1)
+
+        elif ch == "/":
+            return _ScanResult("/", "DIV_INTEIRA", line=line, col=col, next_index=i + 1)
+
+        # Pontuação (para suportar exemplo)
+        elif ch == "(":
+            return _ScanResult("(", "ABRE_PAREN", line=line, col=col, next_index=i + 1)
+
+        elif ch == ")":
+            return _ScanResult(")", "FECHA_PAREN", line=line, col=col, next_index=i + 1)
+
+        elif ch == ",":
+            return _ScanResult(",", "VIRGULA", line=line, col=col, next_index=i + 1)
+
+        elif ch == ";":
+            return _ScanResult(";", "PONTO_VIRGULA", line=line, col=col, next_index=i + 1)
+
+        elif ch == ".":
+            return _ScanResult(".", "PONTO", line=line, col=col, next_index=i + 1)
+
+        elif ch == ":":
+            return _ScanResult(":", "DOIS_PONTOS", line=line, col=col, next_index=i + 1)
+
+        # Se cair aqui, é símbolo desconhecido
+        else:
             return _ScanResult(
-                lexeme="<",
-                token_id="MENOR",
+                lexeme=ch,
+                token_id="Símbolos desconhecidos",
                 line=line,
                 col=col,
                 next_index=i + 1,
             )
-
-        # Aritméticos e símbolos
-        if ch == "+":
-            return _ScanResult("+", "SOMA", line=line, col=col, next_index=i + 1)
-        if ch == "-":
-            return _ScanResult("-", "SUBTRACAO", line=line, col=col, next_index=i + 1)
-        if ch == "%":
-            return _ScanResult("%", "MOD", line=line, col=col, next_index=i + 1)
-        if ch == "/":
-            return _ScanResult("/", "DIV_INTEIRA", line=line, col=col, next_index=i + 1)
-
-        # Pontuação (para suportar exemplo)
-        if ch == "(":
-            return _ScanResult("(", "ABRE_PAREN", line=line, col=col, next_index=i + 1)
-        if ch == ")":
-            return _ScanResult(")", "FECHA_PAREN", line=line, col=col, next_index=i + 1)
-        if ch == ",":
-            return _ScanResult(",", "VIRGULA", line=line, col=col, next_index=i + 1)
-        if ch == ";":
-            return _ScanResult(";", "PONTO_VIRGULA", line=line, col=col, next_index=i + 1)
-        if ch == ".":
-            return _ScanResult(".", "PONTO", line=line, col=col, next_index=i + 1)
-        if ch == ":":
-            return _ScanResult(":", "DOIS_PONTOS", line=line, col=col, next_index=i + 1) 
-
-        # Se cair aqui, é símbolo desconhecido
-        return _ScanResult(
-            lexeme=ch,
-            token_id="Símbolos desconhecidos",
-            line=line,
-            col=col,
-            next_index=i + 1,
-        )
-
