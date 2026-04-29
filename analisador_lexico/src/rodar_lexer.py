@@ -11,7 +11,7 @@ _SRC = Path(__file__).resolve().parent
 if str(_SRC) not in sys.path:
     sys.path.insert(0, str(_SRC))
 
-from lexer_mineires import LexerMineres
+from lexer_mineires import ErroLexico, LexerMineres
 
 
 def format_tokens(tokens: list) -> str:
@@ -41,7 +41,11 @@ def main() -> None:
         sys.exit(1)
 
     lx = LexerMineres()
-    tokens = lx.tokenize_file(str(path))
+    try:
+        tokens = lx.tokenize_file(str(path))
+    except ErroLexico as e:
+        print(f"Erro léxico: {e}", file=sys.stderr)
+        sys.exit(2)
 
     header = (
         f"Arquivo: {path.resolve()}\n"
