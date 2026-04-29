@@ -13,6 +13,88 @@ class Parser:
         self.tokens = tokens
         self.pos = 0
         self.id_para_nome = {valor: chave for chave, valor in TOKEN_IDS.items()}
+        
+        # Otimização: Instanciar os conjuntos de verificação (hashes) no construtor
+        # Assim evitamos a recriação a cada chamada de função
+        self._tipos_validos = frozenset({
+            TOKEN_IDS["TREM_DI_NUMERU"],
+            TOKEN_IDS["TREM_CUM_VIRGULA"],
+            TOKEN_IDS["TREM_DISCRITA"],
+            TOKEN_IDS["TREM_DISCOLHE"],
+            TOKEN_IDS["TROSSO"],
+        })
+        
+        self._io_validos = frozenset({
+            TOKEN_IDS["XOVE"],
+            TOKEN_IDS["OIA_PROCE_VE"],
+        })
+        
+        self._inicio_stmt = frozenset({
+            TOKEN_IDS["RODA_ESSE_TREM"],
+            TOKEN_IDS["ENQUANTO_TIVER_TREM"],
+            TOKEN_IDS["UAI_SE"],
+            TOKEN_IDS["DEPENDENU"],
+            TOKEN_IDS["SIMBORA"],
+            TOKEN_IDS["PARA_O_TREM"],
+            TOKEN_IDS["TOCA_O_TREM"],
+            TOKEN_IDS["TA_BAO"],
+            TOKEN_IDS["UAI"],
+            TOKEN_IDS["IDENTIFICADOR"],
+            TOKEN_IDS["TREM_DI_NUMERU"],
+            TOKEN_IDS["TREM_CUM_VIRGULA"],
+            TOKEN_IDS["TREM_DISCRITA"],
+            TOKEN_IDS["TREM_DISCOLHE"],
+            TOKEN_IDS["TROSSO"],
+        })
+        
+        self._inicio_expr = frozenset({
+            TOKEN_IDS["IDENTIFICADOR"],
+            TOKEN_IDS["STRING_LITERAL"],
+            TOKEN_IDS["TREM_DI_NUMERU_DECIMAL"],
+            TOKEN_IDS["TREM_DI_NUMERU_OCTAL"],
+            TOKEN_IDS["TREM_DI_NUMERU_HEXA"],
+            TOKEN_IDS["TREM_CUM_VIRGULA"],
+            TOKEN_IDS["EH_TRUE"],
+            TOKEN_IDS["NUM_EH_FALSE"],
+            TOKEN_IDS["CHAR_LITERAL"],
+            TOKEN_IDS["ABRE_PAREN"],
+            TOKEN_IDS["SOMA"],
+            TOKEN_IDS["SUBTRACAO"],
+            TOKEN_IDS["VAM_MARCA_NOT"],
+        })
+
+        self._operadores_rel = frozenset({
+            TOKEN_IDS["MEMA_COISA_IGUAL"],
+            TOKEN_IDS["NEH_NADA_DIFERENTE"],
+            TOKEN_IDS["MENOR"],
+            TOKEN_IDS["MENOR_IGUAL"],
+            TOKEN_IDS["MAIOR"],
+            TOKEN_IDS["MAIOR_IGUAL"],
+        })
+
+        self._operadores_add = frozenset({
+            TOKEN_IDS["SOMA"],
+            TOKEN_IDS["SUBTRACAO"],
+        })
+
+        self._operadores_mult = frozenset({
+            TOKEN_IDS["VEIZ_MULT"],
+            TOKEN_IDS["SOB_DIV"],
+            TOKEN_IDS["DIV_INTEIRA"],
+            TOKEN_IDS["MOD"],
+        })
+
+        self._literais_validos = frozenset({
+            TOKEN_IDS["STRING_LITERAL"],
+            TOKEN_IDS["IDENTIFICADOR"],
+            TOKEN_IDS["TREM_DI_NUMERU_DECIMAL"],
+            TOKEN_IDS["TREM_DI_NUMERU_OCTAL"],
+            TOKEN_IDS["TREM_DI_NUMERU_HEXA"],
+            TOKEN_IDS["TREM_CUM_VIRGULA"],
+            TOKEN_IDS["EH_TRUE"],
+            TOKEN_IDS["NUM_EH_FALSE"],
+            TOKEN_IDS["CHAR_LITERAL"],
+        })
 
     # =========================================================
     # Funções básicas de navegação nos tokens
@@ -146,19 +228,10 @@ class Parser:
     # =========================================================
 
     def eh_tipo_atual(self):
-        return self.id_token_atual() in {
-            TOKEN_IDS["TREM_DI_NUMERU"],
-            TOKEN_IDS["TREM_CUM_VIRGULA"],
-            TOKEN_IDS["TREM_DISCRITA"],
-            TOKEN_IDS["TREM_DISCOLHE"],
-            TOKEN_IDS["TROSSO"],
-        }
+        return self.id_token_atual() in self._tipos_validos
 
     def eh_io_atual(self):
-        return self.id_token_atual() in {
-            TOKEN_IDS["XOVE"],
-            TOKEN_IDS["OIA_PROCE_VE"],
-        }
+        return self.id_token_atual() in self._io_validos
 
     def inicia_stmt(self):
         """
@@ -166,25 +239,7 @@ class Parser:
         """
         id_atual = self.id_token_atual()
 
-        ids_inicio = {
-            TOKEN_IDS["RODA_ESSE_TREM"],
-            TOKEN_IDS["ENQUANTO_TIVER_TREM"],
-            TOKEN_IDS["UAI_SE"],
-            TOKEN_IDS["DEPENDENU"],
-            TOKEN_IDS["SIMBORA"],
-            TOKEN_IDS["PARA_O_TREM"],
-            TOKEN_IDS["TOCA_O_TREM"],
-            TOKEN_IDS["TA_BAO"],
-            TOKEN_IDS["UAI"],
-            TOKEN_IDS["IDENTIFICADOR"],
-            TOKEN_IDS["TREM_DI_NUMERU"],
-            TOKEN_IDS["TREM_CUM_VIRGULA"],
-            TOKEN_IDS["TREM_DISCRITA"],
-            TOKEN_IDS["TREM_DISCOLHE"],
-            TOKEN_IDS["TROSSO"],
-        }
-
-        if id_atual in ids_inicio:
+        if id_atual in self._inicio_stmt:
             return True
 
         if self.eh_io_atual():
@@ -198,23 +253,7 @@ class Parser:
         """
         id_atual = self.id_token_atual()
 
-        ids_inicio_expr = {
-            TOKEN_IDS["IDENTIFICADOR"],
-            TOKEN_IDS["STRING_LITERAL"],
-            TOKEN_IDS["TREM_DI_NUMERU_DECIMAL"],
-            TOKEN_IDS["TREM_DI_NUMERU_OCTAL"],
-            TOKEN_IDS["TREM_DI_NUMERU_HEXA"],
-            TOKEN_IDS["TREM_CUM_VIRGULA"],
-            TOKEN_IDS["EH_TRUE"],
-            TOKEN_IDS["NUM_EH_FALSE"],
-            TOKEN_IDS["CHAR_LITERAL"],
-            TOKEN_IDS["ABRE_PAREN"],
-            TOKEN_IDS["SOMA"],
-            TOKEN_IDS["SUBTRACAO"],
-            TOKEN_IDS["VAM_MARCA_NOT"],
-        }
-
-        return id_atual in ids_inicio_expr
+        return id_atual in self._inicio_expr
 
     # =========================================================
     # Statements
@@ -576,16 +615,7 @@ class Parser:
         self.restoRel()
 
     def restoRel(self):
-        operadores = {
-            TOKEN_IDS["MEMA_COISA_IGUAL"],
-            TOKEN_IDS["NEH_NADA_DIFERENTE"],
-            TOKEN_IDS["MENOR"],
-            TOKEN_IDS["MENOR_IGUAL"],
-            TOKEN_IDS["MAIOR"],
-            TOKEN_IDS["MAIOR_IGUAL"],
-        }
-
-        if self.id_token_atual() in operadores:
+        if self.id_token_atual() in self._operadores_rel:
             self.avanca()
             self.add()
 
@@ -597,12 +627,7 @@ class Parser:
         self.restoAdd()
 
     def restoAdd(self):
-        operadores = {
-            TOKEN_IDS["SOMA"],
-            TOKEN_IDS["SUBTRACAO"],
-        }
-
-        while self.id_token_atual() in operadores:
+        while self.id_token_atual() in self._operadores_add:
             self.avanca()
             self.mult()
 
@@ -614,14 +639,7 @@ class Parser:
         self.restoMult()
 
     def restoMult(self):
-        operadores = {
-            TOKEN_IDS["VEIZ_MULT"],
-            TOKEN_IDS["SOB_DIV"],
-            TOKEN_IDS["DIV_INTEIRA"],
-            TOKEN_IDS["MOD"],
-        }
-
-        while self.id_token_atual() in operadores:
+        while self.id_token_atual() in self._operadores_mult:
             self.avanca()
             self.uno()
 
@@ -657,19 +675,7 @@ class Parser:
         """
         id_atual = self.id_token_atual()
 
-        literais_validos = {
-            TOKEN_IDS["STRING_LITERAL"],
-            TOKEN_IDS["IDENTIFICADOR"],
-            TOKEN_IDS["TREM_DI_NUMERU_DECIMAL"],
-            TOKEN_IDS["TREM_DI_NUMERU_OCTAL"],
-            TOKEN_IDS["TREM_DI_NUMERU_HEXA"],
-            TOKEN_IDS["TREM_CUM_VIRGULA"],
-            TOKEN_IDS["EH_TRUE"],
-            TOKEN_IDS["NUM_EH_FALSE"],
-            TOKEN_IDS["CHAR_LITERAL"],
-        }
-
-        if id_atual in literais_validos:
+        if id_atual in self._literais_validos:
             self.avanca()
         else:
             linha, coluna = self.linha_coluna_atual()

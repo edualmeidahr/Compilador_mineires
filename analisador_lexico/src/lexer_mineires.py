@@ -114,7 +114,6 @@ class LexerMineres:
     "main": "MAIN",
     "uai_se": "UAI_SE",
     "uai_senao": "UAI_SENAO",
-    "uai_senão": "UAI_SENAO",
     "roda_esse_trem": "RODA_ESSE_TREM",
     "enquanto_tiver_trem": "ENQUANTO_TIVER_TREM",
     "dependenu": "DEPENDENU",
@@ -142,7 +141,6 @@ class LexerMineres:
     # Blocos
     "simbora": "SIMBORA",
     "cabo": "CABO",
-    "cabô": "CABO",
 
     # Terminador
     "uai": "UAI",
