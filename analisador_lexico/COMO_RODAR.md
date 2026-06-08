@@ -1,46 +1,53 @@
-# Como rodar o analisador léxico (Mineirês)
+# Como Executar o Compilador Mineirês
 
-## Requisito
+Este repositório contém o pipeline completo para compilação do Mineirês (Léxico, Sintático, Semântico e Geração de Código Intermediário).
 
-Python 3 instalado.
+## Requisitos
 
-## Onde executar
+- Python 3 instalado.
 
-Abra o terminal na pasta **`analisador_lexico`** (a que contém `src/`, `input/` e `output/`).
+## Onde Executar
 
-## Comando básico
+Abra o seu terminal na pasta **`analisador_lexico`** (a pasta que contém os subdiretórios `src/`, `input/`, etc.).
 
-Lê um arquivo em `input/` e mostra os tokens no terminal:
+---
 
+## 1. Compilador Completo (Recomendado)
+
+O arquivo `rodar_compilador.py` na raiz executa a análise léxica, sintática, semântica e gera o código intermediário (quádruplas).
+
+### Comando Básico (exibindo no terminal)
+```bash
+python3 rodar_compilador.py input/teste_completo.txt
+```
+
+### Salvar as Quádruplas em um Arquivo
+Use a flag `-o` ou `--output` para gravar a lista de quádruplas:
+```bash
+python3 rodar_compilador.py input/teste_completo.txt -o output/codigo_intermediario.txt
+```
+
+---
+
+## 2. Somente Análise Léxica (Opcional)
+
+Se você desejar listar apenas a tabela de tokens gerados pelo analisador léxico:
+
+### Comando Básico
 ```bash
 python3 src/rodar_lexer.py input/exemplo_fibonacci.txt
 ```
 
-## Salvar a saída em arquivo
-
+### Salvar os Tokens em um Arquivo
 ```bash
 python3 src/rodar_lexer.py input/exemplo_fibonacci.txt -o output/tokens_saida.txt
 ```
 
-A mensagem “Tokens também salvos em: …” aparece no terminal; o conteúdo completo (cabeçalho + lista) vai para o arquivo indicado em `-o` / `--output`.
+---
 
-## Outros exemplos
+## 3. Rodando os Testes Unitários e de Integração
 
+Você pode rodar toda a suíte de testes automáticos (50 testes cobrindo análise sintática, semântica, erros léxicos e mais) com o comando:
 ```bash
-python3 src/rodar_lexer.py input/exemplo_completo_mineires.txt -o output/tokens_completo.txt
-python3 src/rodar_lexer.py input/exemplo_numericos_mineires.txt -o output/tokens_numericos.txt
-```
-
-## Ajuda
-
-```bash
-python3 src/rodar_lexer.py -h
-```
-
-## Se estiver na pasta “pai” do repositório
-
-Use os caminhos completos até o script e até o `.txt`:
-
-```bash
-python3 analisador_lexico/src/rodar_lexer.py analisador_lexico/input/exemplo_fibonacci.txt
+python3 -m unittest discover -s tests -v
 ```

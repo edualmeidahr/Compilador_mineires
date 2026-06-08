@@ -1,4 +1,4 @@
-Arquivo: /home/eduardo/Documentos/7 Periodo/compilador/analisador_lexico/input/demonstracao_lexer_total.txt
+Arquivo: C:\Users\Bruno\Documents\Faculdade\Compiladores\Compilador_mineires\analisador_lexico\input\demonstracao_lexer_total.txt
 Total de tokens: 161
 
 ( 11,  1)     1  bora_cumpade
@@ -53,23 +53,23 @@ Total de tokens: 161
 ( 28, 29)     4  uai
 ( 29,  5)    13  f1
 ( 29,  8)    28  fica_assim_entao
-( 29, 25)     9  3.14
+( 29, 25)    62  3.14
 ( 29, 30)     4  uai
 ( 30,  5)    13  f2
 ( 30,  8)    28  fica_assim_entao
-( 30, 25)     9  0.5
+( 30, 25)    62  0.5
 ( 30, 29)     4  uai
 ( 31,  5)    13  f3
 ( 31,  8)    28  fica_assim_entao
-( 31, 25)     9  0.25
+( 31, 25)    62  0.25
 ( 31, 29)     4  uai
 ( 32,  5)    13  f2
 ( 32,  8)    28  fica_assim_entao
-( 32, 25)     9  4.0
+( 32, 25)    62  4.0
 ( 32, 28)     4  uai
 ( 33,  5)    13  f4
 ( 33,  8)    28  fica_assim_entao
-( 33, 25)     9  2.0
+( 33, 25)    62  2.0
 ( 33, 27)     4  uai
 ( 34,  5)    13  s1
 ( 34,  8)    28  fica_assim_entao
@@ -124,7 +124,7 @@ Total de tokens: 161
 ( 44,  8)    28  fica_assim_entao
 ( 44, 25)    13  f1
 ( 44, 28)    20  +
-( 44, 30)     9  0.5
+( 44, 30)    62  0.5
 ( 44, 33)     4  uai
 ( 46,  5)    35  uai_se
 ( 46, 12)    14  (
@@ -137,7 +137,7 @@ Total de tokens: 161
 ( 47, 12)    28  fica_assim_entao
 ( 47, 29)    13  f2
 ( 47, 32)    51  sob
-( 47, 36)     9  2.0
+( 47, 36)    62  2.0
 ( 47, 40)     4  uai
 ( 48,  5)     3  cabo
 ( 48, 10)    36  uai_senao

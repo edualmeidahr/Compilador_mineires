@@ -9,6 +9,12 @@ class ErroSintatico(Exception):
     pass
 
 
+class ErroSemantico(Exception):
+    """Exceção usada para indicar erro semântico."""
+
+    pass
+
+
 class Parser:
     def __init__(self, tokens):
         self.tokens = tokens
@@ -19,6 +25,17 @@ class Parser:
         self.cont_temp = 0
         self.cont_label = 0
         # --------------------------------------------------
+
+        # --- CONTADORES E TABELAS SEMÂNTICAS ---
+        self.tabela_simbolos = {}       # Dict[str, str]
+        self.tipos_temporarios = {}     # Dict[str, str]
+        self._tipo_keyword_para_simbolo = {
+            TOKEN_IDS["TREM_DI_NUMERU"]: "a",
+            TOKEN_IDS["TREM_CUM_VIRGULA"]: "f",
+            TOKEN_IDS["TREM_DISCRITA"]: "s",
+            TOKEN_IDS["TREM_DISCOLHE"]: "b",
+            TOKEN_IDS["TROSSO"]: "c"
+        }
 
         # Otimização: Instanciar os conjuntos de verificação (hashes) no construtor
         # Assim evitamos a recriação a cada chamada de função
@@ -118,6 +135,81 @@ class Parser:
             }
         )
 
+    def obter_tipo(self, lugar):
+        if not isinstance(lugar, str):
+            return None
+        if lugar in self.tabela_simbolos:
+            return self.tabela_simbolos[lugar]
+        if lugar in self.tipos_temporarios:
+            return self.tipos_temporarios[lugar]
+        # Literais
+        if (lugar.startswith('"') and lugar.endswith('"')):
+            return "s"
+        if (lugar.startswith("'") and lugar.endswith("'")):
+            return "c"
+        if lugar in ("eh", "num_eh"):
+            return "b"
+        if "." in lugar:
+            return "f"
+        # Pode ser int
+        if lugar.isdigit() or lugar.startswith("0x") or (lugar.startswith("0") and len(lugar) > 1 and lugar[1].isdigit()):
+            return "a"
+        return None
+
+    def checar_tipo_binop(self, op, arg1, arg2, temp):
+        t1 = self.obter_tipo(arg1)
+        t2 = self.obter_tipo(arg2)
+        
+        if t1 is None or t2 is None:
+            raise ErroSemantico(f"Erro semântico: tipo desconhecido para os operandos de '{op}'")
+            
+        if op in ("or", "and", "xor"):
+            if t1 != "b" or t2 != "b":
+                raise ErroSemantico(f"Erro semântico: operação lógica '{op}' exige operandos do tipo bool ('b'), mas encontrou '{t1}' e '{t2}'")
+            self.tipos_temporarios[temp] = "b"
+            
+        elif op in ("add", "sub", "veiz", "sob", "/", "%"):
+            if t1 not in ("a", "f") or t2 not in ("a", "f"):
+                raise ErroSemantico(f"Erro semântico: operação aritmética '{op}' inválida para os tipos '{t1}' e '{t2}'")
+            
+            if op == "%" or op == "/":
+                if t1 != "a" or t2 != "a":
+                    raise ErroSemantico(f"Erro semântico: operação '{op}' exige operandos inteiros ('a'), mas encontrou '{t1}' e '{t2}'")
+                self.tipos_temporarios[temp] = "a"
+            elif op == "sob":
+                self.tipos_temporarios[temp] = "f"
+            else:
+                self.tipos_temporarios[temp] = "f" if (t1 == "f" or t2 == "f") else "a"
+
+    def checar_tipo_unop(self, op, arg, temp):
+        t = self.obter_tipo(arg)
+        if t is None:
+            raise ErroSemantico(f"Erro semântico: tipo desconhecido para o operando de '{op}'")
+            
+        if op == "not":
+            if t != "b":
+                raise ErroSemantico(f"Erro semântico: operação lógica 'not' exige operando bool ('b'), mas encontrou '{t}'")
+            self.tipos_temporarios[temp] = "b"
+        elif op == "uno":
+            if t not in ("a", "f"):
+                raise ErroSemantico(f"Erro semântico: sinal unário exige operando numérico, mas encontrou '{t}'")
+            self.tipos_temporarios[temp] = t
+
+    def checar_tipo_relop(self, op, arg1, arg2, temp):
+        t1 = self.obter_tipo(arg1)
+        t2 = self.obter_tipo(arg2)
+        if t1 is None or t2 is None:
+            raise ErroSemantico(f"Erro semântico: tipo desconhecido para os operandos de '{op}'")
+            
+        if op in ("less", "gret", "leq", "geq"):
+            if t1 not in ("a", "f") or t2 not in ("a", "f"):
+                raise ErroSemantico(f"Erro semântico: comparação relacional '{op}' exige tipos numéricos, mas encontrou '{t1}' e '{t2}'")
+        elif op in ("eq", "dif"):
+            if t1 != t2:
+                raise ErroSemantico(f"Erro semântico: comparação de igualdade exige tipos iguais, mas encontrou '{t1}' e '{t2}'")
+                
+        self.tipos_temporarios[temp] = "b"
+
     # =========================================================
     # Geradores de Código Intermediário
     # =========================================================
@@ -208,17 +300,7 @@ class Parser:
                 f"{nome_atual} ('{lexema_atual}')"
             )
 
-    def consome_um_dos_lexemas(self, *lexemas_esperados):
-        atual = self.lexema_atual()
-        if atual in lexemas_esperados:
-            self.avanca()
-        else:
-            linha, coluna = self.linha_coluna_atual()
-            raise ErroSintatico(
-                f"Erro sintático na linha {linha}, coluna {coluna}: "
-                f"esperava um destes lexemas {lexemas_esperados}, "
-                f"mas encontrou '{atual}'"
-            )
+
 
     # =========================================================
     # Ponto de entrada
@@ -303,6 +385,35 @@ class Parser:
         id_atual = self.id_token_atual()
 
         return id_atual in self._inicio_expr
+
+    def eh_identificador(self, lugar):
+        if not isinstance(lugar, str) or not lugar:
+            return False
+        # Não pode ser temporário (começa com _t seguido de números)
+        if lugar.startswith("_t") and lugar[2:].isdigit():
+            return False
+        # Não pode ser literal booleano
+        if lugar in ("eh", "num_eh"):
+            return False
+        # Não pode ser literal string/char
+        if (lugar.startswith('"') and lugar.endswith('"')) or (
+            lugar.startswith("'") and lugar.endswith("'")
+        ):
+            return False
+        # Não pode ser número (decimal, float, hex, octal)
+        if lugar[0].isdigit() or (
+            lugar.startswith(".") and len(lugar) > 1 and lugar[1].isdigit()
+        ):
+            return False
+        # Não pode ser palavra reservada
+        from lexer_mineires import LexerMineres
+
+        if lugar in LexerMineres._KEYWORDS:
+            return False
+        # Deve começar com letra ou _
+        if not (lugar[0].isalpha() or lugar[0] == "_"):
+            return False
+        return True
 
     # =========================================================
     # Statements
@@ -426,7 +537,7 @@ class Parser:
                 f"esperava um tipo, mas encontrou '{self.lexema_atual()}'"
             )
 
-    def identList(self, valor_padrao):
+    def identList(self, valor_padrao, tipo_simbolo):
         """
         <identList> -> IDENT <restoIdentList>
         Recebe: O valor padrão definido pelo tipo.
@@ -435,16 +546,20 @@ class Parser:
         nome_variavel = self.lexema_atual()  # Pega o nome (ex: "k")
         self.consome_id(TOKEN_IDS["IDENTIFICADOR"])
 
+        if nome_variavel in self.tabela_simbolos:
+            raise ErroSemantico(f"Erro semântico: re-declaração da variável '{nome_variavel}'")
+        self.tabela_simbolos[nome_variavel] = tipo_simbolo
+
         # Monta a quádrupla dessa variável
         quadrupla_atual = [("att", nome_variavel, valor_padrao, "none")]
 
         # Pega as quádruplas do resto da lista (se houver mais variáveis depois da vírgula)
-        quadruplas_resto = self.restoIdentList(valor_padrao)
+        quadruplas_resto = self.restoIdentList(valor_padrao, tipo_simbolo)
 
         # Junta a quádrupla atual com as que vieram do resto e devolve
         return quadrupla_atual + quadruplas_resto
 
-    def restoIdentList(self, valor_padrao):
+    def restoIdentList(self, valor_padrao, tipo_simbolo):
         """
         <restoIdentList> -> ',' IDENT <restoIdentList> | &
         Recebe: O valor padrão definido pelo tipo.
@@ -459,6 +574,10 @@ class Parser:
             nome_variavel = self.lexema_atual()  # Pega o nome depois da vírgula
             self.consome_id(TOKEN_IDS["IDENTIFICADOR"])
 
+            if nome_variavel in self.tabela_simbolos:
+                raise ErroSemantico(f"Erro semântico: re-declaração da variável '{nome_variavel}'")
+            self.tabela_simbolos[nome_variavel] = tipo_simbolo
+
             # Adiciona a quádrupla na lista
             quadruplas.append(("att", nome_variavel, valor_padrao, "none"))
 
@@ -469,11 +588,14 @@ class Parser:
         """
         <declaration> -> <type> <identList> 'uai'
         """
+        id_tipo = self.id_token_atual()
+        tipo_simbolo = self._tipo_keyword_para_simbolo.get(id_tipo)
+
         # 1. Pega o valor padrão baseado no tipo
         valor_padrao = self.type()
 
         # 2. Pede pro identList gerar as quádruplas passando o valor padrão
-        codigo = self.identList(valor_padrao)
+        codigo = self.identList(valor_padrao, tipo_simbolo)
 
         self.consome_id(TOKEN_IDS["UAI"])
 
@@ -500,6 +622,8 @@ class Parser:
             nome_variavel = (
                 self.lexema_atual()
             )  # Pega a variável que vai receber o valor
+            if nome_variavel not in self.tabela_simbolos:
+                raise ErroSemantico(f"Erro semântico: variável '{nome_variavel}' não declarada")
 
             self.consome_id(TOKEN_IDS["IDENTIFICADOR"])
             self.consome_id(TOKEN_IDS["FECHA_PAREN"])
@@ -590,6 +714,13 @@ class Parser:
         codigo_expr, lugar_expr = self.expr()
         codigo_if.extend(codigo_expr)
 
+        tipo_cond = self.obter_tipo(lugar_expr)
+        if tipo_cond != "b":
+            raise ErroSemantico(
+                f"Erro semântico na linha {self.linha_coluna_atual()[0]}: "
+                f"a condição do 'uai_se' deve ser do tipo bool ('b'), mas encontrou '{tipo_cond}'"
+            )
+
         # Criamos as placas
         l_falso_if = self.novo_label("l_falso_if")
         l_inicio_if = self.novo_label("l_inicio_if")
@@ -653,6 +784,13 @@ class Parser:
         codigo_expr, lugar_expr = self.expr()
         codigo_while.extend(codigo_expr)
 
+        tipo_cond = self.obter_tipo(lugar_expr)
+        if tipo_cond != "b":
+            raise ErroSemantico(
+                f"Erro semântico na linha {self.linha_coluna_atual()[0]}: "
+                f"a condição do 'enquanto_tiver_trem' deve ser do tipo bool ('b'), mas encontrou '{tipo_cond}'"
+            )
+
         # 4. Se a condição for falsa, pula lá pro final do laço (foge do while)
         codigo_while.append(("if", lugar_expr, l_dentro_while, l_fim_while))
 
@@ -711,6 +849,14 @@ class Parser:
         codigo_cond, lugar_cond = self.optExpr()
         codigo_for.extend(codigo_cond)
 
+        if lugar_cond != "none":
+            tipo_cond = self.obter_tipo(lugar_cond)
+            if tipo_cond != "b":
+                raise ErroSemantico(
+                    f"Erro semântico na linha {self.linha_coluna_atual()[0]}: "
+                    f"a condição do 'roda_esse_trem' deve ser do tipo bool ('b'), mas encontrou '{tipo_cond}'"
+                )
+
         codigo_for.append(("if", lugar_cond, l_vdd_for, l_fim_for))
 
         self.consome_id(TOKEN_IDS["PONTO_VIRGULA"])
@@ -752,39 +898,73 @@ class Parser:
         """
         self.consome_id(TOKEN_IDS["DEPENDENU"])
         self.consome_id(TOKEN_IDS["ABRE_PAREN"])
+        switch_var = self.lexema_atual()
+        if switch_var not in self.tabela_simbolos:
+            raise ErroSemantico(f"Erro semântico: variável '{switch_var}' não declarada")
         self.consome_id(TOKEN_IDS["IDENTIFICADOR"])
         self.consome_id(TOKEN_IDS["FECHA_PAREN"])
         self.consome_id(TOKEN_IDS["SIMBORA"])
-        self.dosCasos()
-        self.consome_id(TOKEN_IDS["CABO"])
 
-    def dosCasos(self):
+        l_fim_switch = self.novo_label("l_fim_switch")
+        codigo_casos = self.dosCasos(switch_var, l_fim_switch)
+
+        self.consome_id(TOKEN_IDS["CABO"])
+        return codigo_casos + [("label", l_fim_switch, "none", "none")]
+
+    def dosCasos(self, switch_var, l_fim_switch):
         """
         <dosCasos> -> <doCaso> <restoDosCasos>
         """
-        self.doCaso()
-        self.restoDosCasos()
+        codigo_caso = self.doCaso(switch_var, l_fim_switch)
+        codigo_resto = self.restoDosCasos(switch_var, l_fim_switch)
+        return codigo_caso + codigo_resto
 
-    def doCaso(self):
+    def doCaso(self, switch_var, l_fim_switch):
         """
-        <doCaso> -> 'du_casu' <fatorZin> ':' <stmt>
+        <doCaso> -> 'du_casu' <fatorZinMenorAinda> ':' <stmt>
         """
         self.consome_id(TOKEN_IDS["DU_CASU"])
-        self.fatorZin()
+        literal_val = self.fatorZinMenorAinda()
         self.consome_lexema(":")
-        self.stmt()
 
-    def restoDosCasos(self):
+        l_vdd_case = self.novo_label("l_vdd_case")
+        l_next_case = self.novo_label("l_next_case")
+
+        temp = self.novo_temp()
+        codigo = [
+            ("eq", temp, switch_var, literal_val),
+            ("if", temp, l_vdd_case, l_next_case),
+            ("label", l_vdd_case, "none", "none"),
+        ]
+
+        codigo_stmt = self.stmt()
+        if codigo_stmt:
+            codigo.extend(codigo_stmt)
+
+        codigo.extend(
+            [
+                ("jump", l_fim_switch, "none", "none"),
+                ("label", l_next_case, "none", "none"),
+            ]
+        )
+        return codigo
+
+    def restoDosCasos(self, switch_var, l_fim_switch):
         """
-        <restoDosCasos> -> <doCaso><restoDosCasos> | 'default' ':' <stmt> | &
+        <restoDosCasos> -> <doCaso> <restoDosCasos> | 'default' ':' <stmt> | &
         """
+        codigo_total = []
         while self.id_token_atual() == TOKEN_IDS["DU_CASU"]:
-            self.doCaso()
+            codigo_total.extend(self.doCaso(switch_var, l_fim_switch))
 
         if self.lexema_atual() == "default":
             self.consome_lexema("default")
             self.consome_lexema(":")
-            self.stmt()
+            codigo_stmt = self.stmt()
+            if codigo_stmt:
+                codigo_total.extend(codigo_stmt)
+
+        return codigo_total
 
     # =========================================================
     # Expressões
@@ -806,9 +986,27 @@ class Parser:
 
     def restoAtrib(self, lugar_esq):
         if self.id_token_atual() == TOKEN_IDS["FICA_ASSIM_ENTAO"]:
+            if not self.eh_identificador(lugar_esq):
+                linha, coluna = self.linha_coluna_atual()
+                raise ErroSintatico(
+                    f"Erro sintático na linha {linha}, coluna {coluna}: "
+                    f"o lado esquerdo de uma atribuição deve ser um identificador, "
+                    f"mas encontrou '{lugar_esq}'"
+                )
+            if lugar_esq not in self.tabela_simbolos:
+                raise ErroSemantico(f"Erro semântico: variável '{lugar_esq}' não declarada")
+
             self.consome_id(TOKEN_IDS["FICA_ASSIM_ENTAO"])
 
             codigo_dir, lugar_dir = self.atrib()
+
+            tipo_esq = self.obter_tipo(lugar_esq)
+            tipo_dir = self.obter_tipo(lugar_dir)
+            if tipo_esq != tipo_dir:
+                raise ErroSemantico(
+                    f"Erro semântico: tipos incompatíveis na atribuição. "
+                    f"Tentando atribuir tipo '{tipo_dir}' para a variável '{lugar_esq}' de tipo '{tipo_esq}'"
+                )
 
             # Quádrupla de atribuição: (att, valor_calculado, none, variavel_destino)
             quad = ("att", lugar_esq, lugar_dir, "none")
@@ -836,6 +1034,7 @@ class Parser:
             codigo_dir, lugar_dir = self.xorExpr()
 
             temp = self.novo_temp()
+            self.checar_tipo_binop("or", lugar_atual, lugar_dir, temp)
             quad = ("or", temp, lugar_atual, lugar_dir)
 
             codigo_total.extend(codigo_dir)
@@ -862,6 +1061,7 @@ class Parser:
             codigo_dir, lugar_dir = self.andExpr()
 
             temp = self.novo_temp()
+            self.checar_tipo_binop("xor", lugar_atual, lugar_dir, temp)
             quad = ("xor", temp, lugar_atual, lugar_dir)
 
             codigo_total.extend(codigo_dir)
@@ -888,6 +1088,7 @@ class Parser:
             codigo_dir, lugar_dir = self.notExpr()
 
             temp = self.novo_temp()
+            self.checar_tipo_binop("and", lugar_atual, lugar_dir, temp)
             quad = ("and", temp, lugar_atual, lugar_dir)
 
             codigo_total.extend(codigo_dir)
@@ -906,6 +1107,7 @@ class Parser:
             codigo_dir, lugar_dir = self.notExpr()
 
             temp = self.novo_temp()
+            self.checar_tipo_unop("not", lugar_dir, temp)
 
             quad = ("not", temp, lugar_dir, "none")
 
@@ -947,6 +1149,7 @@ class Parser:
             elif op == "quase_la":
                 op = "dif"
 
+            self.checar_tipo_relop(op, lugar_esq, lugar_dir, temp)
             quad = (op, temp, lugar_esq, lugar_dir)
 
             codigo_total = codigo_dir
@@ -979,6 +1182,7 @@ class Parser:
                 op = "add"
             elif op == "-":
                 op = "sub"
+            self.checar_tipo_binop(op, lugar_atual, lugar_dir, temp)
             quad = (op, temp, lugar_atual, lugar_dir)
 
             codigo_total.extend(codigo_dir)
@@ -1007,6 +1211,7 @@ class Parser:
             codigo_dir, lugar_dir = self.uno()
 
             temp = self.novo_temp()  # Cria o _t1
+            self.checar_tipo_binop(op, lugar_atual, lugar_dir, temp)
             quad = (op, temp, lugar_atual, lugar_dir)
 
             codigo_total.extend(codigo_dir)
@@ -1025,15 +1230,22 @@ class Parser:
 
         if id_atual == TOKEN_IDS["SOMA"]:
             self.consome_id(TOKEN_IDS["SOMA"])
-            return self.uno()  # O + na frente não muda nada
+            codigo, lugar = self.uno()
+            temp = self.novo_temp()
+            self.checar_tipo_unop("uno", lugar, temp)
+
+            quad = ("uno", "+", temp, lugar)
+            codigo.append(quad)
+            return codigo, temp
 
         elif id_atual == TOKEN_IDS["SUBTRACAO"]:
             self.consome_id(TOKEN_IDS["SUBTRACAO"])
             codigo, lugar = self.uno()
 
             temp = self.novo_temp()
-            # Fazer "-x" é a mesma coisa que "0 - x"
-            quad = ("-", "0", lugar, temp)
+            self.checar_tipo_unop("uno", lugar, temp)
+
+            quad = ("uno", "-", temp, lugar)
             codigo.append(quad)
             return codigo, temp
         else:
@@ -1061,7 +1273,6 @@ class Parser:
         Retorna: (codigo_gerado, valor_lido, eh_variavel)
         """
         id_atual = self.id_token_atual()
-
         lexema = self.lexema_atual()
 
         # Descobrimos se é uma variável ANTES de avançar
@@ -1069,6 +1280,15 @@ class Parser:
 
         if id_atual in self._literais_validos:
             self.avanca()
+            if eh_variavel:
+                if lexema not in self.tabela_simbolos:
+                    raise ErroSemantico(f"Erro semântico: variável '{lexema}' não declarada")
+            else:
+                # Conversão de valores: hex/octal para decimal
+                if id_atual == TOKEN_IDS["TREM_DI_NUMERU_HEXA"]:
+                    lexema = str(int(lexema, 16))
+                elif id_atual == TOKEN_IDS["TREM_DI_NUMERU_OCTAL"]:
+                    lexema = str(int(lexema, 8))
             # Retorna o código vazio, o lexema e se é variável (True) ou literal (False)
             return ([], lexema, eh_variavel)
 
@@ -1077,5 +1297,30 @@ class Parser:
             raise ErroSintatico(
                 f"Erro sintático na linha {linha}, coluna {coluna}: "
                 f"esperava literal, identificador ou expressão entre parênteses, "
+                f"mas encontrou '{self.lexema_atual()}'"
+            )
+
+    def fatorZinMenorAinda(self):
+        """
+        <fatorZinMenorAinda> -> STR | NUMint | NUMfloat | valorBooleano | valorChar
+        """
+        id_atual = self.id_token_atual()
+        lexema = self.lexema_atual()
+        if (
+            id_atual in self._literais_validos
+            and id_atual != TOKEN_IDS["IDENTIFICADOR"]
+        ):
+            self.avanca()
+            # Conversão de valores: hex/octal para decimal
+            if id_atual == TOKEN_IDS["TREM_DI_NUMERU_HEXA"]:
+                lexema = str(int(lexema, 16))
+            elif id_atual == TOKEN_IDS["TREM_DI_NUMERU_OCTAL"]:
+                lexema = str(int(lexema, 8))
+            return lexema
+        else:
+            linha, coluna = self.linha_coluna_atual()
+            raise ErroSintatico(
+                f"Erro sintático na linha {linha}, coluna {coluna}: "
+                f"esperava literal (número, string, char ou booleano), "
                 f"mas encontrou '{self.lexema_atual()}'"
             )

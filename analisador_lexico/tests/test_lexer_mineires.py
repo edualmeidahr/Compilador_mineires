@@ -343,5 +343,171 @@ class TestFloatMultilineAndStress(unittest.TestCase):
         self.assertEqual(t[0][0], "0.12345")
 
 
+class TestSwitchCaseSyntaxAndCodeGen(unittest.TestCase):
+    def setUp(self) -> None:
+        self.lx = LexerMineres()
+
+    def test_switch_case_variables_not_allowed(self) -> None:
+        from analisador_sintatico import Parser, ErroSintatico
+        # 'y' is an identifier variable, which shouldn't be allowed inside du_casu
+        src = "bora_cumpade main() simbora trem_di_numeru x uai dependenu (x) simbora du_casu y: x fica_assim_entao 1 uai cabo cabo"
+        tokens = self.lx.tokenize(src)
+        p = Parser(tokens)
+        with self.assertRaises(ErroSintatico) as ctx:
+            p.parse()
+        self.assertIn("esperava literal", str(ctx.exception))
+
+    def test_switch_case_code_generation(self) -> None:
+        from analisador_sintatico import Parser
+        src = """
+        bora_cumpade main()
+        simbora
+            trem_di_numeru contador, x uai
+            dependenu (contador)
+            simbora
+                du_casu 2:
+                    x fica_assim_entao 1 uai
+                default:
+                    x fica_assim_entao 0 uai
+            cabo
+        cabo
+        """
+        tokens = self.lx.tokenize(src)
+        p = Parser(tokens)
+        quads = p.parse()
+        
+        eq_quads = [q for q in quads if q[0] == "eq"]
+        if_quads = [q for q in quads if q[0] == "if"]
+        jump_quads = [q for q in quads if q[0] == "jump"]
+        
+        self.assertEqual(len(eq_quads), 1)
+        self.assertEqual(eq_quads[0][2], "contador")
+        self.assertEqual(eq_quads[0][3], "2")
+        
+        self.assertEqual(len(if_quads), 1)
+        self.assertEqual(len(jump_quads), 1)
+        self.assertTrue(jump_quads[0][1].startswith("l_fim_switch"))
+
+
+class TestAssignmentLValueValidation(unittest.TestCase):
+    def setUp(self) -> None:
+        self.lx = LexerMineres()
+
+    def test_valid_assignment_passes(self) -> None:
+        from analisador_sintatico import Parser
+        src = "bora_cumpade main() simbora trem_di_numeru x uai x fica_assim_entao 10 uai cabo"
+        tokens = self.lx.tokenize(src)
+        p = Parser(tokens)
+        try:
+            p.parse()
+        except Exception as e:
+            self.fail(f"Valid assignment failed to parse: {e}")
+
+    def test_invalid_assignment_literal_fails(self) -> None:
+        from analisador_sintatico import Parser, ErroSintatico
+        # 5 fica_assim_entao 10 inside parenthesis as an expression
+        src = "bora_cumpade main() simbora trem_di_numeru x uai x fica_assim_entao (5 fica_assim_entao 10) uai cabo"
+        tokens = self.lx.tokenize(src)
+        p = Parser(tokens)
+        with self.assertRaises(ErroSintatico) as ctx:
+            p.parse()
+        self.assertIn("o lado esquerdo de uma atribuição deve ser um identificador", str(ctx.exception))
+
+    def test_invalid_assignment_expression_fails(self) -> None:
+        from analisador_sintatico import Parser, ErroSintatico
+        # (x + 1) fica_assim_entao 5 inside parenthesis as an expression
+        src = "bora_cumpade main() simbora trem_di_numeru x uai x fica_assim_entao ((x + 1) fica_assim_entao 5) uai cabo"
+        tokens = self.lx.tokenize(src)
+        p = Parser(tokens)
+        with self.assertRaises(ErroSintatico) as ctx:
+            p.parse()
+        self.assertIn("o lado esquerdo de uma atribuição deve ser um identificador", str(ctx.exception))
+
+
+class TestSemanticAnalysis(unittest.TestCase):
+    def setUp(self) -> None:
+        self.lx = LexerMineres()
+
+    def test_re_declaration_fails(self) -> None:
+        from analisador_sintatico import Parser, ErroSemantico
+        src = "bora_cumpade main() simbora trem_di_numeru x, x uai cabo"
+        tokens = self.lx.tokenize(src)
+        p = Parser(tokens)
+        with self.assertRaises(ErroSemantico) as ctx:
+            p.parse()
+        self.assertIn("re-declaração", str(ctx.exception))
+
+    def test_prior_declaration_fails(self) -> None:
+        from analisador_sintatico import Parser, ErroSemantico
+        src = "bora_cumpade main() simbora x fica_assim_entao 10 uai cabo"
+        tokens = self.lx.tokenize(src)
+        p = Parser(tokens)
+        with self.assertRaises(ErroSemantico) as ctx:
+            p.parse()
+        self.assertIn("não declarada", str(ctx.exception))
+
+    def test_type_compatibility_assignment_fails(self) -> None:
+        from analisador_sintatico import Parser, ErroSemantico
+        src = 'bora_cumpade main() simbora trem_di_numeru x uai x fica_assim_entao "ola" uai cabo'
+        tokens = self.lx.tokenize(src)
+        p = Parser(tokens)
+        with self.assertRaises(ErroSemantico) as ctx:
+            p.parse()
+        self.assertIn("tipos incompatíveis na atribuição", str(ctx.exception))
+
+    def test_invalid_operation_fails(self) -> None:
+        from analisador_sintatico import Parser, ErroSemantico
+        src = 'bora_cumpade main() simbora trem_discrita s uai s fica_assim_entao s - "a" uai cabo'
+        tokens = self.lx.tokenize(src)
+        p = Parser(tokens)
+        with self.assertRaises(ErroSemantico) as ctx:
+            p.parse()
+        self.assertIn("operação aritmética", str(ctx.exception))
+
+    def test_invalid_condition_if_fails(self) -> None:
+        from analisador_sintatico import Parser, ErroSemantico
+        src = 'bora_cumpade main() simbora uai_se ("teste") simbora cabo cabo'
+        tokens = self.lx.tokenize(src)
+        p = Parser(tokens)
+        with self.assertRaises(ErroSemantico) as ctx:
+            p.parse()
+        self.assertIn("a condição do 'uai_se' deve ser do tipo bool", str(ctx.exception))
+
+    def test_invalid_condition_while_fails(self) -> None:
+        from analisador_sintatico import Parser, ErroSemantico
+        src = 'bora_cumpade main() simbora enquanto_tiver_trem ("teste") simbora cabo cabo'
+        tokens = self.lx.tokenize(src)
+        p = Parser(tokens)
+        with self.assertRaises(ErroSemantico) as ctx:
+            p.parse()
+        self.assertIn("a condição do 'enquanto_tiver_trem' deve ser do tipo bool", str(ctx.exception))
+
+    def test_invalid_condition_for_fails(self) -> None:
+        from analisador_sintatico import Parser, ErroSemantico
+        src = 'bora_cumpade main() simbora trem_di_numeru i uai roda_esse_trem (i fica_assim_entao 1; "teste"; i fica_assim_entao i + 1) simbora cabo cabo'
+        tokens = self.lx.tokenize(src)
+        p = Parser(tokens)
+        with self.assertRaises(ErroSemantico) as ctx:
+            p.parse()
+        self.assertIn("a condição do 'roda_esse_trem' deve ser do tipo bool", str(ctx.exception))
+
+    def test_literal_hex_octal_conversion_in_quads(self) -> None:
+        from analisador_sintatico import Parser
+        # Hexa: 0xA -> 10, Octal: 012 -> 10
+        src = 'bora_cumpade main() simbora trem_di_numeru x, y uai x fica_assim_entao 0xA uai y fica_assim_entao 012 uai cabo'
+        tokens = self.lx.tokenize(src)
+        p = Parser(tokens)
+        quads = p.parse()
+        # filter for assignment quads
+        att_quads = [q for q in quads if q[0] == "att" and q[1] in ("x", "y")]
+        self.assertEqual(len(att_quads), 4)
+        # Declaration default initializations
+        self.assertEqual(att_quads[0], ("att", "x", "0", "none"))
+        self.assertEqual(att_quads[1], ("att", "y", "0", "none"))
+        # Actual assignments with converted hex/octal
+        self.assertEqual(att_quads[2], ("att", "x", "10", "none"))
+        self.assertEqual(att_quads[3], ("att", "y", "10", "none"))
+
+
 if __name__ == "__main__":
     unittest.main()

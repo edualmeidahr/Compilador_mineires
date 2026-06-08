@@ -9,7 +9,7 @@ fim_do_causo
 bora_cumpade main()
 simbora
     causo 1. DECLARAÇÃO DE TODOS OS TIPOS fim_do_causo
-    trem_di_numeru contador, limite uai
+    trem_di_numeru contador, limite, i uai
     trem_cum_virgula nota_final uai
     trem_discrita mensagem uai
     trem_discolhe passou_de_ano uai

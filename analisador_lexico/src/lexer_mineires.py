@@ -25,20 +25,18 @@ TOKEN_IDS: Dict[str, int] = {
     "SIMBORA": 2,
     "CABO": 3,
     "UAI": 4,
-
     # Tipos
     "TREM_DI_NUMERU": 5,
-    "TREM_DI_NUMERU_DECIMAL": 6,
-    "TREM_DI_NUMERU_OCTAL": 7,
-    "TREM_DI_NUMERU_HEXA": 8,
+    "TREM_DI_NUMERU_DECIMAL": 6,  # MUDAR
+    "TREM_DI_NUMERU_OCTAL": 7,  # MUDAR
+    "TREM_DI_NUMERU_HEXA": 8,  # MUDAR
     "TREM_CUM_VIRGULA": 9,
+    # "NUMERO_VIRGULA":
     "TREM_DISCRITA": 10,
     "TREM_DISCOLHE": 11,
     "TROSSO": 12,
-
     # Identificador
     "IDENTIFICADOR": 13,
-
     # Operadores e símbolos
     "ABRE_PAREN": 14,
     "FECHA_PAREN": 15,
@@ -46,26 +44,21 @@ TOKEN_IDS: Dict[str, int] = {
     "PONTO_VIRGULA": 17,
     "PONTO": 18,
     "DOIS_PONTOS": 19,
-
     "SOMA": 20,
     "SUBTRACAO": 21,
     "DIV_INTEIRA": 22,
     "MOD": 23,
-
     "MAIOR": 24,
     "MAIOR_IGUAL": 25,
     "MENOR": 26,
     "MENOR_IGUAL": 27,
-
     "FICA_ASSIM_ENTAO": 28,
     "MEMA_COISA_IGUAL": 29,
     "NEH_NADA_DIFERENTE": 30,
-
     "QUARQUE_UM_OR": 31,
     "TAMEM_AND": 32,
     "VAM_MARCA_NOT": 33,
     "UM_O_OTO_XOR": 34,
-
     # Controle
     "UAI_SE": 35,
     "UAI_SENAO": 36,
@@ -78,21 +71,17 @@ TOKEN_IDS: Dict[str, int] = {
     "TOCA_O_TREM": 43,
     "EH_TRUE": 44,
     "NUM_EH_FALSE": 45,
-
     # IO / especiais
     "XOVE": 46,
     "OIA_PROCE_VE": 47,
     "MAIN": 48,
     "DEFAULT": 49,
-
     # Operadores aritméticos por palavra
     "VEIZ_MULT": 50,
     "SOB_DIV": 51,
-
     # Literais
     "STRING_LITERAL": 60,
     "CHAR_LITERAL": 61,
-
     # Erros
     "Números mal formados": 90,
     "Símbolos desconhecidos": 91,
@@ -183,63 +172,55 @@ class LexerMineres:
 
     # Palavras reservadas / palavras-chave (inclui operadores lógicos e alguns operadores aritméticos)
     _KEYWORDS: Dict[str, str] = {
-    # Controle / estruturas
-    "bora_cumpade": "BORA_CUMPADE",
-    "main": "MAIN",
-    "uai_se": "UAI_SE",
-    "uai_senao": "UAI_SENAO",
-    "roda_esse_trem": "RODA_ESSE_TREM",
-    "enquanto_tiver_trem": "ENQUANTO_TIVER_TREM",
-    "dependenu": "DEPENDENU",
-    "du_casu": "DU_CASU",
-    "default": "DEFAULT",
-    "ta_bao": "TA_BAO",
-    "para_o_trem": "PARA_O_TREM",
-    "toca_o_trem": "TOCA_O_TREM",
-
-    # Entrada / saída
-    "xove": "XOVE",
-    "oia_proce_ve": "OIA_PROCE_VE",
-
-    # Tipos
-    "trem_di_numeru": "TREM_DI_NUMERU",
-    "trem_cum_virgula": "TREM_CUM_VIRGULA",
-    "trem_discrita": "TREM_DISCRITA",
-    "trem_discolhe": "TREM_DISCOLHE",
-    "trosso": "TROSSO",
-
-    # Valores lógicos
-    "eh": "EH_TRUE",
-    "num_eh": "NUM_EH_FALSE",
-
-    # Blocos
-    "simbora": "SIMBORA",
-    "cabo": "CABO",
-
-    # Terminador
-    "uai": "UAI",
-
-    # Operadores por palavra
-    "fica_assim_entao": "FICA_ASSIM_ENTAO",
-    "mema_coisa": "MEMA_COISA_IGUAL",
-    "neh_nada": "NEH_NADA_DIFERENTE",
-
-    # Lógicos
-    "quarque_um": "QUARQUE_UM_OR",
-    "tamem": "TAMEM_AND",
-    "vam_marca": "VAM_MARCA_NOT",
-    "um_o_oto": "UM_O_OTO_XOR",
-
-    # Aritméticos por palavra
-    "veiz": "VEIZ_MULT",
-    "sob": "SOB_DIV",
-}
+        # Controle / estruturas
+        "bora_cumpade": "BORA_CUMPADE",
+        "main": "MAIN",
+        "uai_se": "UAI_SE",
+        "uai_senao": "UAI_SENAO",
+        "roda_esse_trem": "RODA_ESSE_TREM",
+        "enquanto_tiver_trem": "ENQUANTO_TIVER_TREM",
+        "dependenu": "DEPENDENU",
+        "du_casu": "DU_CASU",
+        "default": "DEFAULT",
+        "ta_bao": "TA_BAO",
+        "para_o_trem": "PARA_O_TREM",
+        "toca_o_trem": "TOCA_O_TREM",
+        # Entrada / saída
+        "xove": "XOVE",
+        "oia_proce_ve": "OIA_PROCE_VE",
+        # Tipos
+        "trem_di_numeru": "TREM_DI_NUMERU",
+        "trem_cum_virgula": "TREM_CUM_VIRGULA",
+        "trem_discrita": "TREM_DISCRITA",
+        "trem_discolhe": "TREM_DISCOLHE",
+        "trosso": "TROSSO",
+        # Valores lógicos
+        "eh": "EH_TRUE",
+        "num_eh": "NUM_EH_FALSE",
+        # Blocos
+        "simbora": "SIMBORA",
+        "cabo": "CABO",
+        # Terminador
+        "uai": "UAI",
+        # Operadores por palavra
+        "fica_assim_entao": "FICA_ASSIM_ENTAO",
+        "mema_coisa": "MEMA_COISA_IGUAL",
+        "neh_nada": "NEH_NADA_DIFERENTE",
+        # Lógicos
+        "quarque_um": "QUARQUE_UM_OR",
+        "tamem": "TAMEM_AND",
+        "vam_marca": "VAM_MARCA_NOT",
+        "um_o_oto": "UM_O_OTO_XOR",
+        # Aritméticos por palavra
+        "veiz": "VEIZ_MULT",
+        "sob": "SOB_DIV",
+    }
 
     # Caracteres válidos em identificadores
     _IS_IDENT_START = staticmethod(lambda ch: ch.isalpha() or ch == "_")
     _IS_IDENT_PART = staticmethod(lambda ch: ch.isalnum() or ch == "_")
 
-# Caracteres whitespace a serem ignorados
+    # Caracteres whitespace a serem ignorados
     _WHITESPACE = {" ", "\t", "\r", "\n"}
 
     # Separadores típicos (usados para ajudar na recuperação de erros)
@@ -250,7 +231,7 @@ class LexerMineres:
 
     def _to_token_id(self, token_name: str) -> int:
         return TOKEN_IDS.get(token_name, -1)
-        
+
     def tokenize(self, source: str) -> List[Token]:
         tokens: List[Token] = []
         i = 0
@@ -277,16 +258,24 @@ class LexerMineres:
             # Strings (aspas duplas) e char (aspas simples), com sequências de escape
             if ch == '"':
                 res = self._scan_string_dfa(source, i, line, col)
-                tokens.append((res.lexeme, self._to_token_id(res.token_id), res.line, res.col))
-                texto_bruto = source[i:res.next_index]
-                i, line, col = self._advance_to(source, res.next_index, line, col, texto_bruto)
+                tokens.append(
+                    (res.lexeme, self._to_token_id(res.token_id), res.line, res.col)
+                )
+                texto_bruto = source[i : res.next_index]
+                i, line, col = self._advance_to(
+                    source, res.next_index, line, col, texto_bruto
+                )
                 continue
 
             if ch == "'":
                 res = self._scan_char_dfa(source, i, line, col)
-                tokens.append((res.lexeme, self._to_token_id(res.token_id), res.line, res.col))
-                texto_bruto = source[i:res.next_index]
-                i, line, col = self._advance_to(source, res.next_index, line, col, texto_bruto)
+                tokens.append(
+                    (res.lexeme, self._to_token_id(res.token_id), res.line, res.col)
+                )
+                texto_bruto = source[i : res.next_index]
+                i, line, col = self._advance_to(
+                    source, res.next_index, line, col, texto_bruto
+                )
                 continue
 
             # Comentários iniciam com a palavra "causo"
@@ -295,34 +284,46 @@ class LexerMineres:
                 res = self._scan_identifier_or_keyword_dfa(source, i, line, col)
                 if res.token_id == "COMMENT_SKIPPED":
                     # comentário já foi consumido; res.lexeme contém o intervalo consumido
-                    texto_bruto = source[i:res.next_index]
-                    i, line, col = self._advance_to(source, res.next_index, line, col, texto_bruto)
+                    texto_bruto = source[i : res.next_index]
+                    i, line, col = self._advance_to(
+                        source, res.next_index, line, col, texto_bruto
+                    )
                     continue
-                tokens.append((res.lexeme, self._to_token_id(res.token_id), res.line, res.col))
-                texto_bruto = source[i:res.next_index]
-                i, line, col = self._advance_to(source, res.next_index, line, col, texto_bruto)
+                tokens.append(
+                    (res.lexeme, self._to_token_id(res.token_id), res.line, res.col)
+                )
+                texto_bruto = source[i : res.next_index]
+                i, line, col = self._advance_to(
+                    source, res.next_index, line, col, texto_bruto
+                )
                 continue
 
             # Números (inclui float que começa com ponto: .5 → lexema 0.5)
             if ch.isdigit() or (
-                ch == "."
-                and i + 1 < len(source)
-                and source[i + 1].isdigit()
+                ch == "." and i + 1 < len(source) and source[i + 1].isdigit()
             ):
                 if ch == ".":
                     res = self._scan_number_dfa_leading_dot(source, i, line, col)
                 else:
                     res = self._scan_number_dfa(source, i, line, col)
-                tokens.append((res.lexeme, self._to_token_id(res.token_id), res.line, res.col))
-                texto_bruto = source[i:res.next_index]
-                i, line, col = self._advance_to(source, res.next_index, line, col, texto_bruto)
+                tokens.append(
+                    (res.lexeme, self._to_token_id(res.token_id), res.line, res.col)
+                )
+                texto_bruto = source[i : res.next_index]
+                i, line, col = self._advance_to(
+                    source, res.next_index, line, col, texto_bruto
+                )
                 continue
 
             # Operadores e símbolos (1-2 caracteres)
             res = self._scan_operator_or_symbol_dfa(source, i, line, col)
-            tokens.append((res.lexeme, self._to_token_id(res.token_id), res.line, res.col))
-            texto_bruto = source[i:res.next_index]
-            i, line, col = self._advance_to(source, res.next_index, line, col, texto_bruto)
+            tokens.append(
+                (res.lexeme, self._to_token_id(res.token_id), res.line, res.col)
+            )
+            texto_bruto = source[i : res.next_index]
+            i, line, col = self._advance_to(
+                source, res.next_index, line, col, texto_bruto
+            )
 
         return self._pos_processa_literais_float(tokens)
 
@@ -346,9 +347,7 @@ class LexerMineres:
                 col += 1
         return i, line, col
 
-    def _pos_processa_literais_float(
-        self, tokens: List[Token]
-    ) -> List[Token]:
+    def _pos_processa_literais_float(self, tokens: List[Token]) -> List[Token]:
         nomes = _nomes_variaveis_tipo_trem_cum_virgula(tokens)
         if not nomes:
             return tokens
@@ -421,7 +420,9 @@ class LexerMineres:
         token_id = self._KEYWORDS.get(lexeme)
         if token_id is None:
             token_id = "IDENTIFICADOR"
-        return _ScanResult(lexeme=lexeme, token_id=token_id, line=line, col=col, next_index=j)
+        return _ScanResult(
+            lexeme=lexeme, token_id=token_id, line=line, col=col, next_index=j
+        )
 
     # -------------------------
     # DFA: Comentários multilinha
@@ -938,7 +939,7 @@ class LexerMineres:
                 token_id="TREM_DI_NUMERU_HEXA",
                 line=line,
                 col=col,
-                next_index=j
+                next_index=j,
             )
 
         elif state == S.OCTAL_DIGITS:
@@ -948,14 +949,17 @@ class LexerMineres:
                 _falha_numero(line, col, lexeme, "literal octal inválido")
             if v > _MAX_INT32:
                 _falha_numero(
-                    line, col, lexeme, "estouro em literal octal (excede 32 bits com sinal)"
+                    line,
+                    col,
+                    lexeme,
+                    "estouro em literal octal (excede 32 bits com sinal)",
                 )
             return _ScanResult(
                 lexeme=lexeme,
                 token_id="TREM_DI_NUMERU_OCTAL",
                 line=line,
                 col=col,
-                next_index=j
+                next_index=j,
             )
 
         elif state == S.AFTER_0:
@@ -965,7 +969,7 @@ class LexerMineres:
                 token_id="TREM_DI_NUMERU_DECIMAL",
                 line=line,
                 col=col,
-                next_index=j
+                next_index=j,
             )
 
         elif state == S.DECIMAL_DIGITS:
@@ -974,7 +978,7 @@ class LexerMineres:
                 token_id="TREM_DI_NUMERU_DECIMAL",
                 line=line,
                 col=col,
-                next_index=j
+                next_index=j,
             )
 
         elif state == S.FLOAT_FRAC:
@@ -983,7 +987,7 @@ class LexerMineres:
                 token_id="TREM_CUM_VIRGULA",
                 line=line,
                 col=col,
-                next_index=j
+                next_index=j,
             )
 
         elif state == S.FLOAT_PONTO_SEM_FRAC:
@@ -992,7 +996,7 @@ class LexerMineres:
                 token_id="TREM_CUM_VIRGULA",
                 line=line,
                 col=col,
-                next_index=j
+                next_index=j,
             )
 
         elif state in (S.ERROR, S.HEX_PREFIX_X):
@@ -1120,7 +1124,9 @@ class LexerMineres:
             return _ScanResult(",", "VIRGULA", line=line, col=col, next_index=i + 1)
 
         elif ch == ";":
-            return _ScanResult(";", "PONTO_VIRGULA", line=line, col=col, next_index=i + 1)
+            return _ScanResult(
+                ";", "PONTO_VIRGULA", line=line, col=col, next_index=i + 1
+            )
 
         elif ch == ".":
             return _ScanResult(".", "PONTO", line=line, col=col, next_index=i + 1)
