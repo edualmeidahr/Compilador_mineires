@@ -1,0 +1,115 @@
+bora_cumpade main()
+simbora
+    // 1. Declarações e Atribuições Básicas
+    trem_di_numeru int1, int2, int_res uai
+    trem_cum_virgula float1, float2, float_res uai
+    trem_discrita str1, str2, str_res uai
+    trem_discolhe b1, b2, b_res uai
+    trosso c1, c2 uai
+
+    int1 fica_assim_entao 10 uai
+    int2 fica_assim_entao 3 uai
+    float1 fica_assim_entao 5.5 uai
+    float2 fica_assim_entao 2.0 uai
+
+    // 2. Aritmética
+    int_res fica_assim_entao int1 + int2 uai // 13
+    oia_proce_ve("Soma inteira (10 + 3): ", int_res) uai
+
+    int_res fica_assim_entao int1 - int2 uai // 7
+    oia_proce_ve("Subtracao inteira (10 - 3): ", int_res) uai
+
+    int_res fica_assim_entao int1 veiz int2 uai // 30
+    oia_proce_ve("Multiplicacao inteira (10 * 3): ", int_res) uai
+
+    int_res fica_assim_entao int1 / int2 uai // 3 (divisao inteira)
+    oia_proce_ve("Divisao inteira (10 / 3): ", int_res) uai
+
+    int_res fica_assim_entao int1 % int2 uai // 1 (modulo)
+    oia_proce_ve("Modulo (10 % 3): ", int_res) uai
+
+    float_res fica_assim_entao float1 + float2 uai // 7.5
+    oia_proce_ve("Soma float (5.5 + 2.0): ", float_res) uai
+
+    float_res fica_assim_entao float1 sob float2 uai // 2.75 (divisao real)
+    oia_proce_ve("Divisao real (5.5 sob 2.0): ", float_res) uai
+
+    // 3. Concatenação de Strings e Chars
+    str1 fica_assim_entao "Bao" uai
+    str2 fica_assim_entao " demais" uai
+    c1 fica_assim_entao '!' uai
+    c2 fica_assim_entao '?' uai
+
+    str_res fica_assim_entao str1 + str2 uai // "Bao demais"
+    oia_proce_ve("Concatena string + string: ", str_res) uai
+
+    str_res fica_assim_entao str1 + c1 uai // "Bao!"
+    oia_proce_ve("Concatena string + char: ", str_res) uai
+
+    str_res fica_assim_entao c1 + str2 uai // "! demais"
+    oia_proce_ve("Concatena char + string: ", str_res) uai
+
+    str_res fica_assim_entao c1 + c2 uai // "!?"
+    oia_proce_ve("Concatena char + char: ", str_res) uai
+
+    // 4. Operações Lógicas
+    b1 fica_assim_entao eh uai
+    b2 fica_assim_entao num_eh uai
+
+    b_res fica_assim_entao b1 tamem b2 uai // num_eh
+    oia_proce_ve("AND (eh AND num_eh): ", b_res) uai
+
+    b_res fica_assim_entao b1 quarque_um b2 uai // eh
+    oia_proce_ve("OR (eh OR num_eh): ", b_res) uai
+
+    b_res fica_assim_entao b1 um_o_oto b2 uai // eh (xor)
+    oia_proce_ve("XOR (eh XOR num_eh): ", b_res) uai
+
+    b_res fica_assim_entao vam_marca b1 uai // num_eh
+    oia_proce_ve("NOT (NOT eh): ", b_res) uai
+
+    // 5. Comparações Relacionais
+    b_res fica_assim_entao int1 > int2 uai // eh (10 > 3)
+    oia_proce_ve("Comparacao (10 > 3): ", b_res) uai
+
+    b_res fica_assim_entao float1 <= float2 uai // num_eh (5.5 <= 2.0)
+    oia_proce_ve("Comparacao (5.5 <= 2.0): ", b_res) uai
+
+    b_res fica_assim_entao str1 mema_coisa "Bao" uai // eh
+    oia_proce_ve("Igualdade string: ", b_res) uai
+
+    b_res fica_assim_entao c1 neh_nada c2 uai // eh ('!' != '?')
+    oia_proce_ve("Diferenca char: ", b_res) uai
+
+    // 6. Controle de Fluxo - Condicional
+    uai_se (int1 > 15) simbora
+        oia_proce_ve("Erro: int1 nao eh maior que 15") uai
+    cabo
+    uai_senao simbora
+        oia_proce_ve("Sucesso: int1 (10) menor ou igual a 15") uai
+    cabo
+
+    // 7. Controle de Fluxo - Loops
+    trem_di_numeru limite, i uai
+    limite fica_assim_entao 3 uai
+    i fica_assim_entao 1 uai
+    enquanto_tiver_trem (i <= limite) simbora
+        oia_proce_ve("Loop enquanto_tiver_trem: ", i) uai
+        i fica_assim_entao i + 1 uai
+    cabo
+
+    roda_esse_trem (i fica_assim_entao 1; i <= limite; i fica_assim_entao i + 1) simbora
+        oia_proce_ve("Loop roda_esse_trem: ", i) uai
+    cabo
+
+    // 8. Seleção (Switch/Case)
+    dependenu (int2) simbora
+        du_casu 1:
+            oia_proce_ve("Erro: int2 nao eh 1") uai
+        du_casu 3:
+            oia_proce_ve("Sucesso: int2 eh 3 no dependenu") uai
+        default:
+            oia_proce_ve("Erro: default do dependenu") uai
+    cabo
+
+cabo

@@ -27,10 +27,10 @@ if str(_SRC) not in sys.path:
 from lexer_mineires import TOKEN_IDS, ErroLexico, LexerMineres  # noqa: E402
 
 # IDs usados nas asserções (espelham TOKEN_IDS)
-ID_FLOAT = TOKEN_IDS["TREM_CUM_VIRGULA"]
-ID_DEC = TOKEN_IDS["TREM_DI_NUMERU_DECIMAL"]
-ID_OCT = TOKEN_IDS["TREM_DI_NUMERU_OCTAL"]
-ID_HEX = TOKEN_IDS["TREM_DI_NUMERU_HEXA"]
+ID_FLOAT = TOKEN_IDS["FLOAT_LITERAL"]
+ID_DEC = TOKEN_IDS["INT_DECIMAL_LITERAL"]
+ID_OCT = TOKEN_IDS["INT_OCTAL_LITERAL"]
+ID_HEX = TOKEN_IDS["INT_HEXA_LITERAL"]
 ID_DIV = TOKEN_IDS["DIV_INTEIRA"]
 ID_PONTO = TOKEN_IDS["PONTO"]
 ID_IDENT = TOKEN_IDS["IDENTIFICADOR"]
@@ -79,8 +79,8 @@ class TestFloatLeadingZeroLexeme(unittest.TestCase):
         )
 
 
-class TestOctalSignedInt32Bound(unittest.TestCase):
-    """Octal válido; estouro acima de 0x7FFFFFFF → ErroLexico."""
+class TestNumericSignedInt32Bound(unittest.TestCase):
+    """Literais válidos; estouro acima de 0x7FFFFFFF → ErroLexico."""
 
     def setUp(self) -> None:
         self.lx = LexerMineres()
@@ -97,15 +97,35 @@ class TestOctalSignedInt32Bound(unittest.TestCase):
         t = self.lx.tokenize("0123")
         self.assertEqual(_only_ids_and_lexemes(t), [("0123", ID_OCT)])
 
-    def test_overflow_one_above_max_raises(self) -> None:
+    def test_octal_overflow_raises(self) -> None:
         # 0o20000000000 == 2^31, maior que 0x7FFFFFFF
         with self.assertRaises(ErroLexico) as ctx:
             self.lx.tokenize("020000000000")
         self.assertIn("estouro", str(ctx.exception).lower())
 
-    def test_larger_literal_raises(self) -> None:
-        with self.assertRaises(ErroLexico):
-            self.lx.tokenize("0200000000000")
+    def test_max_int32_decimal_ok(self) -> None:
+        src = "2147483647"
+        t = self.lx.tokenize(src)
+        self.assertEqual(len(t), 1)
+        self.assertEqual(t[0][0], src)
+        self.assertEqual(t[0][1], ID_DEC)
+
+    def test_decimal_overflow_raises(self) -> None:
+        with self.assertRaises(ErroLexico) as ctx:
+            self.lx.tokenize("2147483648")
+        self.assertIn("estouro", str(ctx.exception).lower())
+
+    def test_max_int32_hex_ok(self) -> None:
+        src = "0x7FFFFFFF"
+        t = self.lx.tokenize(src)
+        self.assertEqual(len(t), 1)
+        self.assertEqual(t[0][0], src)
+        self.assertEqual(t[0][1], ID_HEX)
+
+    def test_hex_overflow_raises(self) -> None:
+        with self.assertRaises(ErroLexico) as ctx:
+            self.lx.tokenize("0x80000000")
+        self.assertIn("estouro", str(ctx.exception).lower())
 
 
 class TestMalformedNumberAborts(unittest.TestCase):
@@ -507,6 +527,139 @@ class TestSemanticAnalysis(unittest.TestCase):
         # Actual assignments with converted hex/octal
         self.assertEqual(att_quads[2], ("att", "x", "10", "none"))
         self.assertEqual(att_quads[3], ("att", "y", "10", "none"))
+
+    def test_string_and_char_addition_success(self) -> None:
+        from analisador_sintatico import Parser
+        src = """
+        bora_cumpade main()
+        simbora
+            trem_discrita s1, s2, s3 uai
+            trosso c1, c2 uai
+            s1 fica_assim_entao "ola" uai
+            s2 fica_assim_entao s1 + " mundo" uai
+            s3 fica_assim_entao s2 + '!' uai
+            s1 fica_assim_entao 'A' + s2 uai
+            s2 fica_assim_entao 'A' + 'B' uai
+        cabo
+        """
+        tokens = self.lx.tokenize(src)
+        p = Parser(tokens)
+        try:
+            p.parse()
+        except Exception as e:
+            self.fail(f"String and char addition failed: {e}")
+
+    def test_string_subtraction_fails(self) -> None:
+        from analisador_sintatico import Parser, ErroSemantico
+        src = """
+        bora_cumpade main()
+        simbora
+            trem_discrita s1 uai
+            s1 fica_assim_entao s1 - "a" uai
+        cabo
+        """
+        tokens = self.lx.tokenize(src)
+        p = Parser(tokens)
+        with self.assertRaises(ErroSemantico) as ctx:
+            p.parse()
+        self.assertIn("operação aritmética", str(ctx.exception))
+
+    def test_string_multiplication_fails(self) -> None:
+        from analisador_sintatico import Parser, ErroSemantico
+        src = """
+        bora_cumpade main()
+        simbora
+            trem_discrita s1 uai
+            s1 fica_assim_entao s1 veiz 3 uai
+        cabo
+        """
+        tokens = self.lx.tokenize(src)
+        p = Parser(tokens)
+        with self.assertRaises(ErroSemantico) as ctx:
+            p.parse()
+        self.assertIn("operação aritmética", str(ctx.exception))
+
+
+    def test_float_to_int_assignment_fails(self) -> None:
+        from analisador_sintatico import Parser, ErroSemantico
+        src = """
+        bora_cumpade main()
+        simbora
+            trem_di_numeru x uai
+            trem_cum_virgula y uai
+            y fica_assim_entao 1.5 uai
+            x fica_assim_entao y uai
+        cabo
+        """
+        tokens = self.lx.tokenize(src)
+        p = Parser(tokens)
+        with self.assertRaises(ErroSemantico) as ctx:
+            p.parse()
+        self.assertIn("tipos incompatíveis", str(ctx.exception))
+
+    def test_int_to_float_assignment_fails(self) -> None:
+        from analisador_sintatico import Parser, ErroSemantico
+        src = """
+        bora_cumpade main()
+        simbora
+            trem_di_numeru x uai
+            trem_cum_virgula y uai
+            x fica_assim_entao 1 uai
+            y fica_assim_entao x uai
+        cabo
+        """
+        tokens = self.lx.tokenize(src)
+        p = Parser(tokens)
+        with self.assertRaises(ErroSemantico) as ctx:
+            p.parse()
+        self.assertIn("tipos incompatíveis", str(ctx.exception))
+
+    def test_logical_ops_on_int_fails(self) -> None:
+        from analisador_sintatico import Parser, ErroSemantico
+        src = """
+        bora_cumpade main()
+        simbora
+            trem_di_numeru a, b uai
+            trem_discolhe c uai
+            c fica_assim_entao a tamem b uai
+        cabo
+        """
+        tokens = self.lx.tokenize(src)
+        p = Parser(tokens)
+        with self.assertRaises(ErroSemantico) as ctx:
+            p.parse()
+        self.assertIn("operação lógica", str(ctx.exception))
+
+    def test_unary_minus_on_string_fails(self) -> None:
+        from analisador_sintatico import Parser, ErroSemantico
+        src = """
+        bora_cumpade main()
+        simbora
+            trem_discrita s uai
+            s fica_assim_entao -s uai
+        cabo
+        """
+        tokens = self.lx.tokenize(src)
+        p = Parser(tokens)
+        with self.assertRaises(ErroSemantico) as ctx:
+            p.parse()
+        self.assertIn("sinal unário exige operando numérico", str(ctx.exception))
+
+    def test_relational_ops_on_strings_fails(self) -> None:
+        from analisador_sintatico import Parser, ErroSemantico
+        src = """
+        bora_cumpade main()
+        simbora
+            trem_discrita s1, s2 uai
+            trem_discolhe b uai
+            b fica_assim_entao s1 < s2 uai
+        cabo
+        """
+        tokens = self.lx.tokenize(src)
+        p = Parser(tokens)
+        with self.assertRaises(ErroSemantico) as ctx:
+            p.parse()
+        self.assertIn("comparação relacional", str(ctx.exception))
 
 
 if __name__ == "__main__":

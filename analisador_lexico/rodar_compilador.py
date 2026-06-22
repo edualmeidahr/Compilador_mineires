@@ -12,6 +12,7 @@ if str(_SRC) not in sys.path:
 
 from lexer_mineires import ErroLexico, LexerMineres
 from analisador_sintatico import Parser, ErroSintatico, ErroSemantico
+from interpretador import Interpretador, ErroExecucao
 
 
 def format_quadruples(quadruples: list) -> str:
@@ -70,6 +71,15 @@ def main() -> None:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(text, encoding="utf-8")
         print(f"\nCódigo intermediário também salvo em: {args.output.resolve()}", file=sys.stderr)
+
+    # 3. Execução (Interpretador)
+    print("\n--- INICIANDO EXECUÇÃO (MÁQUINA VIRTUAL) ---\n", file=sys.stderr)
+    interpretador = Interpretador(quadruplas, compilador.tabela_simbolos)
+    try:
+        interpretador.executar()
+    except ErroExecucao as e:
+        print(f"\nErro em tempo de execução:\n{e}", file=sys.stderr)
+        sys.exit(5)
 
 
 if __name__ == "__main__":

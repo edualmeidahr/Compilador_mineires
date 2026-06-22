@@ -27,14 +27,14 @@ class Parser:
         # --------------------------------------------------
 
         # --- CONTADORES E TABELAS SEMÂNTICAS ---
-        self.tabela_simbolos = {}       # Dict[str, str]
-        self.tipos_temporarios = {}     # Dict[str, str]
+        self.tabela_simbolos = {}  # Dict[str, str]
+        self.tipos_temporarios = {}  # Dict[str, str]
         self._tipo_keyword_para_simbolo = {
             TOKEN_IDS["TREM_DI_NUMERU"]: "a",
             TOKEN_IDS["TREM_CUM_VIRGULA"]: "f",
             TOKEN_IDS["TREM_DISCRITA"]: "s",
             TOKEN_IDS["TREM_DISCOLHE"]: "b",
-            TOKEN_IDS["TROSSO"]: "c"
+            TOKEN_IDS["TROSSO"]: "c",
         }
 
         # Otimização: Instanciar os conjuntos de verificação (hashes) no construtor
@@ -80,10 +80,10 @@ class Parser:
             {
                 TOKEN_IDS["IDENTIFICADOR"],
                 TOKEN_IDS["STRING_LITERAL"],
-                TOKEN_IDS["TREM_DI_NUMERU_DECIMAL"],
-                TOKEN_IDS["TREM_DI_NUMERU_OCTAL"],
-                TOKEN_IDS["TREM_DI_NUMERU_HEXA"],
-                TOKEN_IDS["TREM_CUM_VIRGULA"],
+                TOKEN_IDS["INT_DECIMAL_LITERAL"],
+                TOKEN_IDS["INT_OCTAL_LITERAL"],
+                TOKEN_IDS["INT_HEXA_LITERAL"],
+                TOKEN_IDS["FLOAT_LITERAL"],
                 TOKEN_IDS["EH_TRUE"],
                 TOKEN_IDS["NUM_EH_FALSE"],
                 TOKEN_IDS["CHAR_LITERAL"],
@@ -125,10 +125,10 @@ class Parser:
             {
                 TOKEN_IDS["STRING_LITERAL"],
                 TOKEN_IDS["IDENTIFICADOR"],
-                TOKEN_IDS["TREM_DI_NUMERU_DECIMAL"],
-                TOKEN_IDS["TREM_DI_NUMERU_OCTAL"],
-                TOKEN_IDS["TREM_DI_NUMERU_HEXA"],
-                TOKEN_IDS["TREM_CUM_VIRGULA"],
+                TOKEN_IDS["INT_DECIMAL_LITERAL"],
+                TOKEN_IDS["INT_OCTAL_LITERAL"],
+                TOKEN_IDS["INT_HEXA_LITERAL"],
+                TOKEN_IDS["FLOAT_LITERAL"],
                 TOKEN_IDS["EH_TRUE"],
                 TOKEN_IDS["NUM_EH_FALSE"],
                 TOKEN_IDS["CHAR_LITERAL"],
@@ -143,71 +143,105 @@ class Parser:
         if lugar in self.tipos_temporarios:
             return self.tipos_temporarios[lugar]
         # Literais
-        if (lugar.startswith('"') and lugar.endswith('"')):
+        if lugar.startswith('"') and lugar.endswith('"'):
             return "s"
-        if (lugar.startswith("'") and lugar.endswith("'")):
+        if lugar.startswith("'") and lugar.endswith("'"):
             return "c"
         if lugar in ("eh", "num_eh"):
             return "b"
         if "." in lugar:
             return "f"
         # Pode ser int
-        if lugar.isdigit() or lugar.startswith("0x") or (lugar.startswith("0") and len(lugar) > 1 and lugar[1].isdigit()):
+        if (
+            lugar.isdigit()
+            or lugar.startswith("0x")
+            or (lugar.startswith("0") and len(lugar) > 1 and lugar[1].isdigit())
+        ):
             return "a"
         return None
 
     def checar_tipo_binop(self, op, arg1, arg2, temp):
         t1 = self.obter_tipo(arg1)
         t2 = self.obter_tipo(arg2)
-        
+
         if t1 is None or t2 is None:
-            raise ErroSemantico(f"Erro semântico: tipo desconhecido para os operandos de '{op}'")
-            
+            raise ErroSemantico(
+                f"Erro semântico: tipo desconhecido para os operandos de '{op}'"
+            )
+
         if op in ("or", "and", "xor"):
             if t1 != "b" or t2 != "b":
-                raise ErroSemantico(f"Erro semântico: operação lógica '{op}' exige operandos do tipo bool ('b'), mas encontrou '{t1}' e '{t2}'")
+                raise ErroSemantico(
+                    f"Erro semântico: operação lógica '{op}' exige operandos do tipo bool ('b'), mas encontrou '{t1}' e '{t2}'"
+                )
             self.tipos_temporarios[temp] = "b"
-            
+
         elif op in ("add", "sub", "veiz", "sob", "/", "%"):
-            if t1 not in ("a", "f") or t2 not in ("a", "f"):
-                raise ErroSemantico(f"Erro semântico: operação aritmética '{op}' inválida para os tipos '{t1}' e '{t2}'")
-            
-            if op == "%" or op == "/":
-                if t1 != "a" or t2 != "a":
-                    raise ErroSemantico(f"Erro semântico: operação '{op}' exige operandos inteiros ('a'), mas encontrou '{t1}' e '{t2}'")
-                self.tipos_temporarios[temp] = "a"
-            elif op == "sob":
-                self.tipos_temporarios[temp] = "f"
+            if op == "add":
+                if t1 in ("a", "f") and t2 in ("a", "f"):
+                    self.tipos_temporarios[temp] = "f" if (t1 == "f" or t2 == "f") else "a"
+                elif t1 in ("s", "c") and t2 in ("s", "c"):
+                    self.tipos_temporarios[temp] = "s"
+                else:
+                    raise ErroSemantico(
+                        f"Erro semântico: operação de soma/concatenação inválida para os tipos '{t1}' e '{t2}'"
+                    )
             else:
-                self.tipos_temporarios[temp] = "f" if (t1 == "f" or t2 == "f") else "a"
+                if t1 not in ("a", "f") or t2 not in ("a", "f"):
+                    raise ErroSemantico(
+                        f"Erro semântico: operação aritmética '{op}' inválida para os tipos '{t1}' e '{t2}'"
+                    )
+
+                if op == "%" or op == "/":
+                    if t1 != "a" or t2 != "a":
+                        raise ErroSemantico(
+                            f"Erro semântico: operação '{op}' exige operandos inteiros ('a'), mas encontrou '{t1}' e '{t2}'"
+                        )
+                    self.tipos_temporarios[temp] = "a"
+                elif op == "sob":
+                    self.tipos_temporarios[temp] = "f"
+                else:
+                    self.tipos_temporarios[temp] = "f" if (t1 == "f" or t2 == "f") else "a"
 
     def checar_tipo_unop(self, op, arg, temp):
         t = self.obter_tipo(arg)
         if t is None:
-            raise ErroSemantico(f"Erro semântico: tipo desconhecido para o operando de '{op}'")
-            
+            raise ErroSemantico(
+                f"Erro semântico: tipo desconhecido para o operando de '{op}'"
+            )
+
         if op == "not":
             if t != "b":
-                raise ErroSemantico(f"Erro semântico: operação lógica 'not' exige operando bool ('b'), mas encontrou '{t}'")
+                raise ErroSemantico(
+                    f"Erro semântico: operação lógica 'not' exige operando bool ('b'), mas encontrou '{t}'"
+                )
             self.tipos_temporarios[temp] = "b"
         elif op == "uno":
             if t not in ("a", "f"):
-                raise ErroSemantico(f"Erro semântico: sinal unário exige operando numérico, mas encontrou '{t}'")
+                raise ErroSemantico(
+                    f"Erro semântico: sinal unário exige operando numérico, mas encontrou '{t}'"
+                )
             self.tipos_temporarios[temp] = t
 
     def checar_tipo_relop(self, op, arg1, arg2, temp):
         t1 = self.obter_tipo(arg1)
         t2 = self.obter_tipo(arg2)
         if t1 is None or t2 is None:
-            raise ErroSemantico(f"Erro semântico: tipo desconhecido para os operandos de '{op}'")
-            
+            raise ErroSemantico(
+                f"Erro semântico: tipo desconhecido para os operandos de '{op}'"
+            )
+
         if op in ("less", "gret", "leq", "geq"):
             if t1 not in ("a", "f") or t2 not in ("a", "f"):
-                raise ErroSemantico(f"Erro semântico: comparação relacional '{op}' exige tipos numéricos, mas encontrou '{t1}' e '{t2}'")
+                raise ErroSemantico(
+                    f"Erro semântico: comparação relacional '{op}' exige tipos numéricos, mas encontrou '{t1}' e '{t2}'"
+                )
         elif op in ("eq", "dif"):
             if t1 != t2:
-                raise ErroSemantico(f"Erro semântico: comparação de igualdade exige tipos iguais, mas encontrou '{t1}' e '{t2}'")
-                
+                raise ErroSemantico(
+                    f"Erro semântico: comparação de igualdade exige tipos iguais, mas encontrou '{t1}' e '{t2}'"
+                )
+
         self.tipos_temporarios[temp] = "b"
 
     # =========================================================
@@ -299,8 +333,6 @@ class Parser:
                 f"esperava lexema '{lexema_esperado}', mas encontrou "
                 f"{nome_atual} ('{lexema_atual}')"
             )
-
-
 
     # =========================================================
     # Ponto de entrada
@@ -547,7 +579,9 @@ class Parser:
         self.consome_id(TOKEN_IDS["IDENTIFICADOR"])
 
         if nome_variavel in self.tabela_simbolos:
-            raise ErroSemantico(f"Erro semântico: re-declaração da variável '{nome_variavel}'")
+            raise ErroSemantico(
+                f"Erro semântico: re-declaração da variável '{nome_variavel}'"
+            )
         self.tabela_simbolos[nome_variavel] = tipo_simbolo
 
         # Monta a quádrupla dessa variável
@@ -575,7 +609,9 @@ class Parser:
             self.consome_id(TOKEN_IDS["IDENTIFICADOR"])
 
             if nome_variavel in self.tabela_simbolos:
-                raise ErroSemantico(f"Erro semântico: re-declaração da variável '{nome_variavel}'")
+                raise ErroSemantico(
+                    f"Erro semântico: re-declaração da variável '{nome_variavel}'"
+                )
             self.tabela_simbolos[nome_variavel] = tipo_simbolo
 
             # Adiciona a quádrupla na lista
@@ -623,7 +659,9 @@ class Parser:
                 self.lexema_atual()
             )  # Pega a variável que vai receber o valor
             if nome_variavel not in self.tabela_simbolos:
-                raise ErroSemantico(f"Erro semântico: variável '{nome_variavel}' não declarada")
+                raise ErroSemantico(
+                    f"Erro semântico: variável '{nome_variavel}' não declarada"
+                )
 
             self.consome_id(TOKEN_IDS["IDENTIFICADOR"])
             self.consome_id(TOKEN_IDS["FECHA_PAREN"])
@@ -881,7 +919,7 @@ class Parser:
         codigo_for.extend(codigo_inc)
 
         # 6. Volta pro início do laço
-        codigo_for.append(("jump", l_inicio_for, "none", l_inicio_for))
+        codigo_for.append(("jump", l_inicio_for, "none", "none"))
 
         # 7. Placa de saída do laço
         codigo_for.append(("label", l_fim_for, "none", "none"))
@@ -900,7 +938,9 @@ class Parser:
         self.consome_id(TOKEN_IDS["ABRE_PAREN"])
         switch_var = self.lexema_atual()
         if switch_var not in self.tabela_simbolos:
-            raise ErroSemantico(f"Erro semântico: variável '{switch_var}' não declarada")
+            raise ErroSemantico(
+                f"Erro semântico: variável '{switch_var}' não declarada"
+            )
         self.consome_id(TOKEN_IDS["IDENTIFICADOR"])
         self.consome_id(TOKEN_IDS["FECHA_PAREN"])
         self.consome_id(TOKEN_IDS["SIMBORA"])
@@ -994,7 +1034,9 @@ class Parser:
                     f"mas encontrou '{lugar_esq}'"
                 )
             if lugar_esq not in self.tabela_simbolos:
-                raise ErroSemantico(f"Erro semântico: variável '{lugar_esq}' não declarada")
+                raise ErroSemantico(
+                    f"Erro semântico: variável '{lugar_esq}' não declarada"
+                )
 
             self.consome_id(TOKEN_IDS["FICA_ASSIM_ENTAO"])
 
@@ -1146,7 +1188,7 @@ class Parser:
                 op = "geq"
             elif op == "mema_coisa":
                 op = "eq"
-            elif op == "quase_la":
+            elif op in ("quase_la", "neh_nada"):
                 op = "dif"
 
             self.checar_tipo_relop(op, lugar_esq, lugar_dir, temp)
@@ -1282,12 +1324,14 @@ class Parser:
             self.avanca()
             if eh_variavel:
                 if lexema not in self.tabela_simbolos:
-                    raise ErroSemantico(f"Erro semântico: variável '{lexema}' não declarada")
+                    raise ErroSemantico(
+                        f"Erro semântico: variável '{lexema}' não declarada"
+                    )
             else:
                 # Conversão de valores: hex/octal para decimal
-                if id_atual == TOKEN_IDS["TREM_DI_NUMERU_HEXA"]:
+                if id_atual == TOKEN_IDS["INT_HEXA_LITERAL"]:
                     lexema = str(int(lexema, 16))
-                elif id_atual == TOKEN_IDS["TREM_DI_NUMERU_OCTAL"]:
+                elif id_atual == TOKEN_IDS["INT_OCTAL_LITERAL"]:
                     lexema = str(int(lexema, 8))
             # Retorna o código vazio, o lexema e se é variável (True) ou literal (False)
             return ([], lexema, eh_variavel)
@@ -1312,9 +1356,9 @@ class Parser:
         ):
             self.avanca()
             # Conversão de valores: hex/octal para decimal
-            if id_atual == TOKEN_IDS["TREM_DI_NUMERU_HEXA"]:
+            if id_atual == TOKEN_IDS["INT_HEXA_LITERAL"]:
                 lexema = str(int(lexema, 16))
-            elif id_atual == TOKEN_IDS["TREM_DI_NUMERU_OCTAL"]:
+            elif id_atual == TOKEN_IDS["INT_OCTAL_LITERAL"]:
                 lexema = str(int(lexema, 8))
             return lexema
         else:

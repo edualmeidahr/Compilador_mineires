@@ -27,11 +27,11 @@ TOKEN_IDS: Dict[str, int] = {
     "UAI": 4,
     # Tipos
     "TREM_DI_NUMERU": 5,
-    "TREM_DI_NUMERU_DECIMAL": 6,  # MUDAR
-    "TREM_DI_NUMERU_OCTAL": 7,  # MUDAR
-    "TREM_DI_NUMERU_HEXA": 8,  # MUDAR
+    "INT_DECIMAL_LITERAL": 6,
+    "INT_OCTAL_LITERAL": 7,
+    "INT_HEXA_LITERAL": 8,
     "TREM_CUM_VIRGULA": 9,
-    # "NUMERO_VIRGULA":
+    "FLOAT_LITERAL": 62,
     "TREM_DISCRITA": 10,
     "TREM_DISCOLHE": 11,
     "TROSSO": 12,
@@ -91,7 +91,8 @@ TOKEN_IDS: Dict[str, int] = {
     "ERRO_COMENTARIO_NAO_FECHADO": 95,
 }
 
-# O id 9 (TREM_CUM_VIRGULA) designa a palavra "trem_cum_virgula" (tipo) e também literais float.
+# O id 9 (TREM_CUM_VIRGULA) designa a palavra "trem_cum_virgula" (tipo).
+# O id 62 (FLOAT_LITERAL) designa os literais float.
 _TIPO_FLOAT_LEXEMA = "trem_cum_virgula"
 
 
@@ -131,8 +132,8 @@ def _coercao_intdecimal_para_float_apos_fica(
     a variável declarada com trem_cum_virgula vira N.0 (id de literal float 9).
     """
     t_fica = TOKEN_IDS["FICA_ASSIM_ENTAO"]
-    t_int = TOKEN_IDS["TREM_DI_NUMERU_DECIMAL"]
-    t_fl = TOKEN_IDS["TREM_CUM_VIRGULA"]
+    t_int = TOKEN_IDS["INT_DECIMAL_LITERAL"]
+    t_fl = TOKEN_IDS["FLOAT_LITERAL"]
     t_ident = TOKEN_IDS["IDENTIFICADOR"]
     out: List[Token] = []
     for j, t in enumerate(tokens):
@@ -934,9 +935,20 @@ class LexerMineres:
         lexeme = "".join(lexeme_chars)
 
         if state == S.HEX_DIGITS:
+            try:
+                v = int(lexeme, 16)
+            except ValueError:
+                _falha_numero(line, col, lexeme, "literal hexadecimal inválido")
+            if v > _MAX_INT32:
+                _falha_numero(
+                    line,
+                    col,
+                    lexeme,
+                    "estouro em literal hexadecimal (excede 32 bits com sinal)",
+                )
             return _ScanResult(
                 lexeme=lexeme,
-                token_id="TREM_DI_NUMERU_HEXA",
+                token_id="INT_HEXA_LITERAL",
                 line=line,
                 col=col,
                 next_index=j,
@@ -956,7 +968,7 @@ class LexerMineres:
                 )
             return _ScanResult(
                 lexeme=lexeme,
-                token_id="TREM_DI_NUMERU_OCTAL",
+                token_id="INT_OCTAL_LITERAL",
                 line=line,
                 col=col,
                 next_index=j,
@@ -966,16 +978,27 @@ class LexerMineres:
             # lexema deve ser "0"
             return _ScanResult(
                 lexeme=lexeme,
-                token_id="TREM_DI_NUMERU_DECIMAL",
+                token_id="INT_DECIMAL_LITERAL",
                 line=line,
                 col=col,
                 next_index=j,
             )
 
         elif state == S.DECIMAL_DIGITS:
+            try:
+                v = int(lexeme, 10)
+            except ValueError:
+                _falha_numero(line, col, lexeme, "literal decimal inválido")
+            if v > _MAX_INT32:
+                _falha_numero(
+                    line,
+                    col,
+                    lexeme,
+                    "estouro em literal decimal (excede 32 bits com sinal)",
+                )
             return _ScanResult(
                 lexeme=lexeme,
-                token_id="TREM_DI_NUMERU_DECIMAL",
+                token_id="INT_DECIMAL_LITERAL",
                 line=line,
                 col=col,
                 next_index=j,
@@ -984,7 +1007,7 @@ class LexerMineres:
         elif state == S.FLOAT_FRAC:
             return _ScanResult(
                 lexeme=lexeme,
-                token_id="TREM_CUM_VIRGULA",
+                token_id="FLOAT_LITERAL",
                 line=line,
                 col=col,
                 next_index=j,
@@ -993,7 +1016,7 @@ class LexerMineres:
         elif state == S.FLOAT_PONTO_SEM_FRAC:
             return _ScanResult(
                 lexeme=lexeme + "0",
-                token_id="TREM_CUM_VIRGULA",
+                token_id="FLOAT_LITERAL",
                 line=line,
                 col=col,
                 next_index=j,
@@ -1038,7 +1061,7 @@ class LexerMineres:
 
         return _ScanResult(
             lexeme="".join(lexeme_chars),
-            token_id="TREM_CUM_VIRGULA",
+            token_id="FLOAT_LITERAL",
             line=line,
             col=col,
             next_index=j,
