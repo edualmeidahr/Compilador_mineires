@@ -325,6 +325,107 @@ class TestInterpretador(unittest.TestCase):
         self.assertEqual(interp.variaveis["eq2"], False)
         self.assertEqual(interp.variaveis["dif2"], True)
 
+    def test_while_loop_with_break(self) -> None:
+        src = """
+        bora_cumpade main()
+        simbora
+            trem_di_numeru i, sum uai
+            i fica_assim_entao 1 uai
+            sum fica_assim_entao 0 uai
+            enquanto_tiver_trem (i <= 10) simbora
+                uai_se (i mema_coisa 5) simbora
+                    para_o_trem uai
+                cabo
+                sum fica_assim_entao sum + i uai
+                i fica_assim_entao i + 1 uai
+            cabo
+        cabo
+        """
+        interp = self.run_source(src)
+        self.assertEqual(interp.variaveis["sum"], 10)  # 1 + 2 + 3 + 4 = 10
+        self.assertEqual(interp.variaveis["i"], 5)
+
+    def test_while_loop_with_continue(self) -> None:
+        src = """
+        bora_cumpade main()
+        simbora
+            trem_di_numeru i, sum uai
+            i fica_assim_entao 0 uai
+            sum fica_assim_entao 0 uai
+            enquanto_tiver_trem (i < 5) simbora
+                i fica_assim_entao i + 1 uai
+                uai_se (i mema_coisa 3) simbora
+                    toca_o_trem uai
+                cabo
+                sum fica_assim_entao sum + i uai
+            cabo
+        cabo
+        """
+        interp = self.run_source(src)
+        self.assertEqual(interp.variaveis["sum"], 12)  # 1 + 2 + 4 + 5 = 12
+
+    def test_for_loop_with_break(self) -> None:
+        src = """
+        bora_cumpade main()
+        simbora
+            trem_di_numeru sum uai
+            trem_di_numeru i uai
+            sum fica_assim_entao 0 uai
+            roda_esse_trem (i fica_assim_entao 1; i <= 5; i fica_assim_entao i + 1) simbora
+                uai_se (i mema_coisa 3) simbora
+                    para_o_trem uai
+                cabo
+                sum fica_assim_entao sum + i uai
+            cabo
+        cabo
+        """
+        interp = self.run_source(src)
+        self.assertEqual(interp.variaveis["sum"], 3)  # 1 + 2 = 3
+
+    def test_for_loop_with_continue(self) -> None:
+        src = """
+        bora_cumpade main()
+        simbora
+            trem_di_numeru sum uai
+            trem_di_numeru i uai
+            sum fica_assim_entao 0 uai
+            roda_esse_trem (i fica_assim_entao 1; i <= 4; i fica_assim_entao i + 1) simbora
+                uai_se (i mema_coisa 2) simbora
+                    toca_o_trem uai
+                cabo
+                sum fica_assim_entao sum + i uai
+            cabo
+        cabo
+        """
+        interp = self.run_source(src)
+        self.assertEqual(interp.variaveis["sum"], 8)  # 1 + 3 + 4 = 8
+
+    def test_break_outside_loop_raises(self) -> None:
+        src = """
+        bora_cumpade main()
+        simbora
+            para_o_trem uai
+        cabo
+        """
+        from analisador_sintatico import ErroSemantico
+        with self.assertRaises(ErroSemantico) as ctx:
+            tokens = self.lx.tokenize(src)
+            Parser(tokens).parse()
+        self.assertIn("só pode ser usado dentro de um laço", str(ctx.exception))
+
+    def test_continue_outside_loop_raises(self) -> None:
+        src = """
+        bora_cumpade main()
+        simbora
+            toca_o_trem uai
+        cabo
+        """
+        from analisador_sintatico import ErroSemantico
+        with self.assertRaises(ErroSemantico) as ctx:
+            tokens = self.lx.tokenize(src)
+            Parser(tokens).parse()
+        self.assertIn("só pode ser usado dentro de um laço", str(ctx.exception))
+
 
 if __name__ == "__main__":
     unittest.main()

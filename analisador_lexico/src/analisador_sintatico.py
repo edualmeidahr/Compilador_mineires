@@ -24,6 +24,7 @@ class Parser:
         # --- NOVOS CONTADORES PARA CÓDIGO INTERMEDIÁRIO ---
         self.cont_temp = 0
         self.cont_label = 0
+        self.pilha_loops = []  # Pilha para rastrear loops ativos (para break/continue)
         # --------------------------------------------------
 
         # --- CONTADORES E TABELAS SEMÂNTICAS ---
@@ -489,12 +490,28 @@ class Parser:
             self.consome_id(TOKEN_IDS["UAI"])
 
         elif id_atual == TOKEN_IDS["PARA_O_TREM"]:
+            linha, coluna = self.linha_coluna_atual()
             self.consome_id(TOKEN_IDS["PARA_O_TREM"])
             self.consome_id(TOKEN_IDS["UAI"])
+            if not self.pilha_loops:
+                raise ErroSemantico(
+                    f"Erro semântico na linha {linha}, coluna {coluna}: "
+                    f"o comando 'para_o_trem' só pode ser usado dentro de um laço."
+                )
+            l_inicio, l_fim = self.pilha_loops[-1]
+            return [("jump", l_fim, "none", "none")]
 
         elif id_atual == TOKEN_IDS["TOCA_O_TREM"]:
+            linha, coluna = self.linha_coluna_atual()
             self.consome_id(TOKEN_IDS["TOCA_O_TREM"])
             self.consome_id(TOKEN_IDS["UAI"])
+            if not self.pilha_loops:
+                raise ErroSemantico(
+                    f"Erro semântico na linha {linha}, coluna {coluna}: "
+                    f"o comando 'toca_o_trem' só pode ser usado dentro de um laço."
+                )
+            l_inicio, l_fim = self.pilha_loops[-1]
+            return [("jump", l_inicio, "none", "none")]
 
         elif id_atual == TOKEN_IDS["TA_BAO"]:
             self.consome_id(TOKEN_IDS["TA_BAO"])
@@ -837,10 +854,15 @@ class Parser:
         # 5. Coloca a placa de "Dentro do While" aqui
         codigo_while.append(("label", l_dentro_while, "none", "none"))
 
+        # Adiciona os rótulos de controle deste laço na pilha para suportar break/continue
+        self.pilha_loops.append((l_inicio_while, l_fim_while))
+
         # 6. Lê o que tá dentro do laço (o corpo do while)
         codigo_stmt = self.stmt()
         if codigo_stmt:
             codigo_while.extend(codigo_stmt)
+
+        self.pilha_loops.pop()
 
         # 7. Acabou o corpo? Volta lá pro topo pra testar de novo!
         codigo_while.append(("jump", l_inicio_while, "none", "none"))
@@ -895,7 +917,8 @@ class Parser:
                     f"a condição do 'roda_esse_trem' deve ser do tipo bool ('b'), mas encontrou '{tipo_cond}'"
                 )
 
-        codigo_for.append(("if", lugar_cond, l_vdd_for, l_fim_for))
+        lugar_cond_if = "eh" if lugar_cond == "none" else lugar_cond
+        codigo_for.append(("if", lugar_cond_if, l_vdd_for, l_fim_for))
 
         self.consome_id(TOKEN_IDS["PONTO_VIRGULA"])
 
@@ -907,10 +930,15 @@ class Parser:
 
         codigo_for.append(("label", l_vdd_for, "none", "none"))
 
+        # Adiciona os rótulos de controle deste laço na pilha para suportar break/continue
+        self.pilha_loops.append((l_soma_for, l_fim_for))
+
         # 4. Lê o CORPO DO LAÇO (o <stmt> ou o <bloco>)
         codigo_stmt = self.stmt()
         if codigo_stmt:
             codigo_for.extend(codigo_stmt)
+
+        self.pilha_loops.pop()
 
         # Coloca a placa de soma aqui
         codigo_for.append(("label", l_soma_for, "none", "none"))
