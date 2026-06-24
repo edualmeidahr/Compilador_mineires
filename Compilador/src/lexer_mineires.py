@@ -1,4 +1,7 @@
 from dataclasses import dataclass
+from typing import Dict, List, Tuple
+
+Token = Tuple[str, int, int, int]
 
 _MAX_INT32 = 0x7FFF_FFFF
 
