@@ -1,0 +1,2 @@
+# Desenvolvimento (opcional): pytest para mesmos testes com filtros/relatórios
+pytest>=7.0

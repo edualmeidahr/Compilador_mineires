@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-"""Lê um arquivo fonte Mineirês e imprime (ou salva) os tokens."""
 
 import argparse
 import sys
@@ -14,14 +13,14 @@ if str(_SRC) not in sys.path:
 from lexer_mineires import ErroLexico, LexerMineres
 
 
-def format_tokens(tokens: list) -> str:
+def format_tokens(tokens):
     lines = []
     for lexema, token_id, linha, coluna in tokens:
         lines.append(f"({linha:3d},{coluna:3d})  {token_id:4d}  {lexema}")
     return "\n".join(lines)
 
 
-def main() -> None:
+def main():
     parser = argparse.ArgumentParser(
         description="Analisador léxico Mineirês: lista tokens (Lexema, Token_ID, Linha, Coluna)."
     )

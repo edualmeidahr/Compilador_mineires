@@ -1,19 +1,11 @@
-from __future__ import annotations
-
 from dataclasses import dataclass
-from typing import Dict, List, NoReturn, Tuple
 
-# Inteiro com sinal 32 bits (constantes numéricas comuns no compilador)
 _MAX_INT32 = 0x7FFF_FFFF
 
-Token = Tuple[str, int, int, int]  # (Lexema, Token_ID_INT, Linha, Coluna)
-
-
 class ErroLexico(Exception):
-    """Levantada quando o analisador léxico encontra erro irrecuperável (ex.: número mal formado)."""
+    pass
 
-
-def _falha_numero(line: int, col: int, lexema: str, motivo: str) -> NoReturn:
+def _falha_numero(line, col, lexema, motivo):
     raise ErroLexico(
         f"Número mal formado: {motivo} (linha {line}, coluna {col}, lexema «{lexema}»)"
     )

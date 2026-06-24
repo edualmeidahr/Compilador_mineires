@@ -1,16 +1,14 @@
-from __future__ import annotations
 import sys
 
 class ErroExecucao(Exception):
-    """Exceção usada para indicar erro em tempo de execução."""
     pass
 
 class Interpretador:
     def __init__(self, quadruplas, tabela_simbolos):
         self.quadruplas = quadruplas
-        self.tabela_simbolos = tabela_simbolos # Dict[str, str] (nome -> tipo, e.g. "contador" -> "a")
-        self.variaveis = {} # Dict[str, any] (armazena os valores das variáveis e temporários)
-        self.labels = {} # Dict[str, int] (mapeia o nome do label para o índice da quádrupla)
+        self.tabela_simbolos = tabela_simbolos
+        self.variaveis = {}
+        self.labels = {}
         self.ip = 0 # Ponteiro de instrução
 
     def mapear_labels(self):
