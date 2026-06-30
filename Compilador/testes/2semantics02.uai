@@ -1,0 +1,22 @@
+// Erro Semântico: Incompatibilidade de tipos
+bora_cumpade main() simbora
+
+    trem_di_numeru idade uai
+    trem_discrita nome uai
+    trem_discolhe flag uai
+
+    idade fica_assim_entao 25 uai
+    nome fica_assim_entao "Uai" uai
+
+    // 1. Atribuição inválida (String para Inteiro)
+    //idade fica_assim_entao nome uai
+
+    // 2. Operação matemática com tipos incompatíveis
+    //idade fica_assim_entao idade + nome uai
+
+    // 3. Comparação lógica inválida entre texto e número
+    //uai_se (nome mema_coisa idade) simbora
+        flag fica_assim_entao eh uai
+    cabo
+
+cabo

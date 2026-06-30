@@ -1,0 +1,13 @@
+// Erro Semântico: Dupla declaração no mesmo escopo
+bora_cumpade main() simbora
+
+    trem_di_numeru trem uai
+    trem_cum_virgula b uai
+
+    // 1. Redeclaração direta com o mesmo tipo
+    //trem_di_numeru trem uai
+
+    // 2. Redeclaração com tipo diferente
+    trem_discrita b uai
+
+cabo

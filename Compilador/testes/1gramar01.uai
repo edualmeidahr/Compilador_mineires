@@ -1,0 +1,41 @@
+
+bora_cumpade main() simbora
+
+    trem_di_numeru a uai
+    trem_cum_virgula b uai
+    trem_discrita c uai
+    trem_discolhe d uai
+    trosso e,f,g, h uai
+
+    //a fica_assim_entao 1 + 2 - 3 veiz 4 sob 5 % 6 / 7 uai
+
+    uai_se (a mema_coisa a) simbora
+        a fica_assim_entao a uai
+    cabo
+    uai_senao simbora
+        a fica_assim_entao 1 uai
+    cabo
+
+    roda_esse_trem (a fica_assim_entao 1; a < 10; a fica_assim_entao a + 1) simbora
+        b fica_assim_entao b + 1.0 uai
+    cabo
+
+    enquanto_tiver_trem (eh) simbora
+        a fica_assim_entao a uai
+    cabo
+
+    xove(trem_di_numeru, a) uai
+    //xove(trem_discolhe, a) uai
+    oia_proce_ve(a, b, c, d, e, "eh", eh, num_eh, 'c', 1, 1.0, 0., 0xF, 077) uai
+
+    dependenu (a) simbora
+        du_casu 1: oia_proce_ve(a) uai
+        du_casu 2: oia_proce_ve(b) uai
+        du_casu 3: oia_proce_ve(c) uai
+        default: oia_proce_ve(d) uai
+    cabo
+
+    d fica_assim_entao vam_marca eh tamem num_eh um_o_oto eh quarque_um num_eh uai
+    d fica_assim_entao a < 1 tamem a > 1 tamem a <= 1 tamem a >= 1 tamem a mema_coisa a tamem a neh_nada a uai 
+
+cabo

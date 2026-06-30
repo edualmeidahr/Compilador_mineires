@@ -1,0 +1,33 @@
+bora_cumpade main() simbora
+
+    trem_discolhe b uai
+
+    // Deve imprimir Verdadeiro / eh
+    b fica_assim_entao (012 + 5 veiz 2 mema_coisa 25 - 15 / 3) tamem (40 % 6 >= 4) uai
+    uai_se (b) 
+        oia_proce_ve("verdadeiro1", '\n') uai
+    uai_senao
+        oia_proce_ve("falso1", '\n') uai
+
+    // Deve imprimir Verdadeiro
+    b fica_assim_entao vam_marca num_eh um_o_oto (10 sob 2 < 3 quarque_um eh tamem num_eh) uai
+    uai_se (b) 
+        oia_proce_ve("verdadeiro2", '\n') uai
+    uai_senao
+        oia_proce_ve("falso2", '\n') uai
+
+    // Deve imprimir Falso / num_eh
+    b fica_assim_entao (5 + 3 veiz 2 > 20 - 4 / 2) tamem (100 % 9 mema_coisa 1) uai
+    uai_se (b) 
+        oia_proce_ve("verdadeiro3", '\n') uai
+    uai_senao
+        oia_proce_ve("falso3", '\n') uai
+
+    // Deve imprimir Falso / num_eh
+    b fica_assim_entao (eh um_o_oto vam_marca num_eh) quarque_um (5 veiz 4 neh_nada 20) uai
+    uai_se (b) 
+        oia_proce_ve("verdadeiro4", '\n') uai
+    uai_senao
+        oia_proce_ve("falso4", '\n') uai
+
+cabo

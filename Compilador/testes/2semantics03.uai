@@ -1,0 +1,15 @@
+// Erro Semântico: Identificadores não declarados
+bora_cumpade main() simbora
+
+    trem_di_numeru conta uai
+    conta fica_assim_entao 10 uai
+
+    // 1. Uso de 'resultado' sem declaração prévia
+    //resultado fica_assim_entao conta veiz 2 uai
+
+    // 2. Uso de 'x' não declarado dentro de uma estrutura condicional
+    uai_se (conta > 5) simbora
+        oia_proce_ve(x) uai
+    cabo
+
+cabo

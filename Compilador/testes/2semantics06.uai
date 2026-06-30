@@ -1,0 +1,62 @@
+
+bora_cumpade main() simbora
+
+    trem_di_numeru a uai
+    trem_cum_virgula b uai
+    trem_discrita c uai
+    trem_discolhe d uai
+    trosso e,f,g, h uai
+
+    // Erro de divisão ou truncamento do valor dividido
+    //a fica_assim_entao 3 sob 2 uai
+
+    // erro de operacao de soma de string com inteiro
+    //a fica_assim_entao 1 + 2 + 3 + 4 + 'a' + 5 uai
+
+    // Erro de tipos diferentes ou truncamento do valor dividido
+    //a fica_assim_entao 4 + 3.12 uai
+
+    // erro de operacao de soma de string com float
+    //b fica_assim_entao 1.0 + 2.0 + 3 + 4 + 'a' + 5 uai
+
+    // Deve passar
+    c fica_assim_entao "1.0" + "2.0" + '\n' uai
+    oia_proce_ve(c) uai
+
+    // Deve passar
+    c fica_assim_entao '1' + '2' + '\n' uai
+    oia_proce_ve(c) uai
+
+    // Deve passar
+    //d fica_assim_entao '1' uai
+    //oia_proce_ve(d) uai
+    //oia_proce_ve('\n') uai
+
+    // Nao Deve passar string guardada em char
+    //d fica_assim_entao '1' + 'a' uai
+
+    // Nao Deve passar subtracao de string
+    //c fica_assim_entao "ab" - "cd" uai
+
+    // Nao Deve passar operacao relacional com string
+    //c fica_assim_entao "ab" < "cd" uai
+
+    // Nao Deve passar operacao com string e boolean
+    //c fica_assim_entao "ab" + "ab" mema_coisa "ab" uai
+
+    // Nao Deve passar operacao com string de comparacao pq ta guardando na string
+    //c fica_assim_entao "ab" neh_nada "ab" tamem "ab" mema_coisa "ab" uai
+
+    // Deve passar operacao com string de comparacao pq ta guardando na boolean
+    d fica_assim_entao "ab" neh_nada "ab" tamem "ab" mema_coisa "ab" uai
+
+    // Nao Deve passar operacao com boolean e string
+    //d fica_assim_entao eh tamem "ab" uai
+
+    // Nao Deve passar operacao com boolean e float, ou considerar qualquer coisa diferente de 1 como falso
+    //d fica_assim_entao eh tamem 2.0 uai
+
+    // Nao Deve passar operacao com boolean e int, ou considerar qualquer coisa diferente de 1 como falso
+    d fica_assim_entao eh tamem 1 uai
+
+cabo

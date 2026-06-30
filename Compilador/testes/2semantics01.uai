@@ -1,0 +1,29 @@
+
+bora_cumpade main() simbora
+
+    trem_di_numeru a uai
+    trem_cum_virgula b uai
+    trem_discrita c uai
+    trem_discolhe d uai
+    trosso e,f,g, h uai
+
+    // print 8
+    a fica_assim_entao 1 + 0xF - 07 veiz 1 uai
+    oia_proce_ve(a, '\n') uai
+
+    // para dar 4
+    a fica_assim_entao 52 % 6 uai
+    oia_proce_ve(a, '\n') uai
+
+    // para dar 3
+    a fica_assim_entao 21 / 7  uai
+    oia_proce_ve(a, '\n') uai
+
+    // para truncar ou dar erro
+    // a fica_assim_entao 43 sob 5 uai
+    oia_proce_ve(a, '\n') uai
+
+    d fica_assim_entao vam_marca eh tamem num_eh um_o_oto eh quarque_um num_eh uai
+    d fica_assim_entao a < 1 tamem a > 1 tamem a <= 1 tamem a >= 1 tamem a mema_coisa a tamem a neh_nada a uai 
+
+cabo

@@ -1,0 +1,44 @@
+=== 0lexer02.uai ===
+Erro sintático:
+Erro sintático na linha 9, coluna 5: esperava CABO, mas encontrou Símbolos desconhecidos ('@')
+
+=== 1gramar02.uai ===
+Erro sintático:
+Erro sintático na linha 3, coluna 1: esperava FECHA_PAREN, mas encontrou SIMBORA ('simbora')
+
+=== 2semantics02.uai ===
+Erro semântico:
+Erro semântico: tipos incompatíveis na atribuição. Tentando atribuir tipo 's' para a variável 'a' de tipo 'a'
+
+=== 2semantics03.uai ===
+Erro semântico:
+Erro semântico: variável 'b' não declarada
+
+=== 2semantics04.uai ===
+Erro semântico:
+Erro semântico: operação de soma/concatenação inválida para os tipos 'a' e 'b'
+
+=== 2semantics05.uai ===
+Erro semântico:
+Erro semântico na linha 7: a condição do 'uai_se' deve ser do tipo bool ('b'), mas encontrou 'a'
+
+=== 3interpreter02.uai ===
+Compilação concluída com sucesso! Programa correto.
+
+--- CÓDIGO INTERMEDIÁRIO (QUÁDRUPLAS) ---
+
+--- INICIANDO EXECUÇÃO (MÁQUINA VIRTUAL) ---
+
+
+Erro em tempo de execução:
+Erro de execução: divisão por zero.
+(att, a, 0, none)
+(att, b, 0, none)
+(att, c, 0.0, none)
+(att, a, 10, none)
+(att, b, 0, none)
+(call, print, none, "Isso deve dar erro no interpretador:")
+(sob, _t1, a, b)
+(att, c, _t1, none)
+Isso deve dar erro no interpretador:
+

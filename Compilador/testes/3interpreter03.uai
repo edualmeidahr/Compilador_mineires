@@ -1,0 +1,24 @@
+
+bora_cumpade main() simbora
+
+    trem_di_numeru i uai
+
+    roda_esse_trem (i fica_assim_entao 1; i <= 12; i fica_assim_entao i + 1)
+    simbora 
+        enquanto_tiver_trem (eh) simbora
+            uai_se (i mema_coisa 6)
+            simbora
+                i fica_assim_entao i + 1 uai
+                oia_proce_ve("continue") uai 
+                toca_o_trem uai
+            cabo
+            uai_se (i > 9)
+            simbora
+                para_o_trem uai
+            cabo
+            oia_proce_ve(i) uai
+            i fica_assim_entao i + 1 uai
+        cabo
+        oia_proce_ve("Dentro for", i) uai
+    cabo
+cabo

@@ -790,15 +790,32 @@ class Parser:
         codigo_if.append(("jump", l_outif, "none", "none"))
 
         # 4. Pega o código do bloco FALSO (uai_senao) se ele existir
-        codigo_else = self.elsePart()
+        codigo_else, eh_else_if = self.elsePart()
 
         codigo_if.append(("label", l_falso_if, "none", "none"))
 
         # 5. Monta o quebra-cabeça
         if codigo_else:  # Se o cara programou um ELSE
-            codigo_if.extend(codigo_else)
-
-        codigo_if.append(("label", l_outif, "none", "none"))
+            if eh_else_if:
+                # Encontra a primeira instrução 'jump' no codigo_else (caso seja um else if)
+                jump_idx = -1
+                for idx, quad in enumerate(codigo_else):
+                    if quad[0] == "jump":
+                        jump_idx = idx
+                        break
+                
+                if jump_idx != -1:
+                    # Insere o label de outif do if pai antes do jump do if filho
+                    codigo_else.insert(jump_idx, ("label", l_outif, "none", "none"))
+                    codigo_if.extend(codigo_else)
+                else:
+                    codigo_if.extend(codigo_else)
+                    codigo_if.append(("label", l_outif, "none", "none"))
+            else:
+                codigo_if.extend(codigo_else)
+                codigo_if.append(("label", l_outif, "none", "none"))
+        else:
+            codigo_if.append(("label", l_outif, "none", "none"))
 
         return codigo_if
 
@@ -809,10 +826,11 @@ class Parser:
 
         if self.id_token_atual() == TOKEN_IDS["UAI_SENAO"]:
             self.avanca()
+            eh_else_if = (self.id_token_atual() == TOKEN_IDS["UAI_SE"])
             codigo_stmt = self.stmt()
-            return codigo_stmt if codigo_stmt else []
+            return (codigo_stmt if codigo_stmt else []), eh_else_if
         else:
-            return []
+            return [], False
 
     def whileStmt(self):
         """

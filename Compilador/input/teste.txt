@@ -1,0 +1,13 @@
+bora_cumpade main() //começo do arquivo
+simbora //começo da função
+
+    trem_di_numeru a uai
+
+    a fica_assim_entao 16 uai
+
+    oia_proce_ve("a") uai
+    
+    oia_proce_ve(a) uai
+
+
+cabo
